@@ -464,6 +464,16 @@ function lb(on){const b=document.getElementById('loadBar');b.className='load-bar
 function setSB(s,m){const b=document.getElementById('syncBadge');if(!b)return;b.className='sync-badge sync-'+s;b.textContent=m;}
 
 async function loadFromServer(quiet=false){
+  // Önce cache'den göster — kullanıcı beklemez
+  const cached = localStorage.getItem('cached_courses');
+  if(cached && !courses.length){
+    try{ courses=JSON.parse(cached); renderSchedule(); }catch(e){}
+  }
+  if(courses.length && quiet){ 
+    // Arka planda güncelle
+    _refreshInBackground();
+    return;
+  }
   if(!quiet)lb(true);
   setSB('busy','⏳ Yükleniyor…');
   try{
@@ -473,12 +483,30 @@ async function loadFromServer(quiet=false){
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
     if(miss.length){sc=[...sc,...miss];apiPost({action:'set_courses',data:sc}).catch(()=>{});}
-    courses=sc;setSB('ok','✓ Güncel');renderSchedule();
+    courses=sc;
+    localStorage.setItem('cached_courses', JSON.stringify(courses));
+    setSB('ok','✓ Güncel');renderSchedule();
   }catch(e){
-    setSB('err','⚠ '+e.message);
-    if(!courses.length){courses=[...PRELOADED];renderSchedule();}
-    if(!quiet)showToast('Yükleme hatası: '+e.message,'error');
+    setSB('err','⚠ Bağlantı hatası');
+    if(!courses.length){
+      courses=[...PRELOADED];
+      renderSchedule();
+    }
   }finally{lb(false);}
+}
+
+async function _refreshInBackground(){
+  try{
+    const data=await apiGet();
+    let sc=Array.isArray(data.courses)?data.courses:[];
+    logs=Array.isArray(data.logs)?data.logs:[];
+    const ids=new Set(sc.map(c=>c.id));
+    const miss=PRELOADED.filter(p=>!ids.has(p.id));
+    if(miss.length){sc=[...sc,...miss];}
+    courses=sc;
+    localStorage.setItem('cached_courses', JSON.stringify(courses));
+    setSB('ok','✓ Güncel');renderSchedule();
+  }catch(e){ setSB('err','⚠ Bağlantı hatası'); }
 }
 async function saveToServer(){
   setSB('busy','⏳ Kaydediliyor…');
@@ -570,27 +598,35 @@ async function submitCourse(){
   const sec=document.getElementById('fSec').value.trim();
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
   if(sBE(te)<sBS(ts)){showToast('Bitiş saati başlangıçtan önce olamaz.','error');return;}
-  const btn=document.getElementById('modalSaveBtn');btn.disabled=true;btn.textContent='Kaydediliyor…';
-  try{
-    if(editingId){
-      const idx=courses.findIndex(c=>c.id===editingId);if(idx<0){closeAddModal();return;}
-      courses[idx]={...courses[idx],instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec};
-      const updated=courses[idx];
-      await apiPost({action:'update_course',data:updated});
-      logAsync({action:'DÜZENLEME',instr,cn,prog:PROGS[prog]?.replace('',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
-      showToast('Ders güncellendi.','success');
-    }else{
-      const iN=instr.toLowerCase();
-      if(courses.filter(c=>c.program===prog&&c.instructor.toLowerCase()===iN&&!isShared(c.courseName)).length>=1){showToast('Bu öğretim üyesi bu programa zaten bir ders eklemiş.','error');btn.disabled=false;btn.textContent='Kaydet';return;}
-      const nc={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
-      courses.push(nc);
-      await apiPost({action:'add_course',data:nc});
-      logAsync({action:'EKLEME',instr,cn,prog:PROGS[prog]?.replace('',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
-      showToast('Ders eklendi.','success');
+  // Limit kontrolü
+  if(!editingId){
+    const iN=instr.toLowerCase();
+    if(courses.filter(c=>c.program===prog&&c.instructor.toLowerCase()===iN&&!isShared(c.courseName)).length>=1){
+      showToast('Bu öğretim üyesi bu programa zaten bir ders eklemiş.','error');return;
     }
-    closeAddModal();renderSchedule();if(isAdmin){renderAdminStats();renderAdminManage();}
-  }catch(e){console.error('submitCourse error:',e);showToast('Kaydedildi (yenileyince görünür).','success');}
-  finally{btn.disabled=false;btn.textContent=editingId?'Güncelle':'Kaydet';}
+  }
+
+  // ÖNCE lokal güncelle ve ekranı göster — anında
+  let savedCourse;
+  if(editingId){
+    const idx=courses.findIndex(c=>c.id===editingId);if(idx<0){closeAddModal();return;}
+    courses[idx]={...courses[idx],instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec};
+    savedCourse=courses[idx];
+  }else{
+    savedCourse={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
+    courses.push(savedCourse);
+  }
+  localStorage.setItem('cached_courses', JSON.stringify(courses));
+  closeAddModal();
+  renderSchedule();
+  if(isAdmin){renderAdminStats();renderAdminManage();}
+  showToast(editingId?'Ders güncellendi.':'Ders eklendi.','success');
+
+  // ARKA PLANDA sunucuya kaydet
+  const action = editingId ? 'update_course' : 'add_course';
+  const logAction = editingId ? 'DÜZENLEME' : 'EKLEME';
+  apiPost({action, data:savedCourse}).catch(e=>console.warn('Sunucu sync hatası:',e));
+  logAsync({action:logAction,instr,cn,prog:PROGS[prog]?.replace(/\n/g,' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
 }
 
 // ══ DELETE ══
@@ -606,23 +642,18 @@ async function confirmDelete(){
   if(!pendingDelId)return;
   const c=courses.find(x=>x.id===pendingDelId);
   closeDelModal();if(!c)return;
-  // Önce ekrandan kaldır
+
+  // Lokal güncelle ve ANINDA göster
   courses=courses.filter(x=>x.id!==pendingDelId);
+  localStorage.setItem('cached_courses', JSON.stringify(courses));
   renderSchedule();
-  setSB('busy','⏳ Siliniyor…');
-  try{
-    // Sunucuya sadece ID gönder — tüm listeyi değil
-    await apiPost({action:'delete_course',id:c.id});
-    logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace('',' ')||c.program,day:c.day,time:c.timeStart+'-'+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
-    setSB('ok','✓ Silindi');
-    showToast('Ders silindi.','success');
-  }catch(e){
-    // Hata olursa geri al
-    courses.push(c);renderSchedule();
-    setSB('ok','✓ Silindi (yenileyince onaylanır)');
-    showToast('Silindi.','success');
-  }
   if(isAdmin){renderAdminStats();renderAdminManage();}
+  showToast('Ders silindi.','success');
+  setSB('ok','✓ Silindi');
+
+  // Arka planda sunucuya gönder
+  apiPost({action:'delete_course',id:c.id}).catch(e=>console.warn('Silme sync:',e));
+  logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace(/\n/g,' ')||c.program,day:c.day,time:c.timeStart+'-'+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
 }
 
 // ══ NAV ══
