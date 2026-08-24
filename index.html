@@ -130,7 +130,10 @@ table.st td[rowspan]{background:#fff!important}
           <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec" onkeydown="if(event.key==='Enter')doSetup()">
         </div>
         <div class="setup-err" id="setupErr"></div>
-        <button class="btn btn-primary" style="margin-top:10px;width:100%" id="setupBtn" onclick="doSetup()">Bağlan ve Başlat</button>
+        <button class="btn btn-primary" style="margin-top:10px;width:100%;padding:12px" id="setupBtn" onclick="doSetup()">Bağlan ve Başlat</button>
+        <div style="margin-top:10px;font-size:.75rem;color:var(--muted)">
+          <a href="#" onclick="debugSetup();return false;" style="color:var(--accent)">Bağlantı sorunu mu var? Buraya tıklayın →</a>
+        </div>
       </div>
     </div>
   </div>
@@ -330,54 +333,99 @@ async function apiPost(body){
 
 // ══ SETUP ══
 async function doSetup(){
-  const inp=document.getElementById('gasUrl');
-  const errEl=document.getElementById('setupErr');
-  const btn=document.getElementById('setupBtn');
-  const url=inp.value.trim();
-  errEl.style.display='none';
-  if(!url){errEl.textContent='Lütfen URL girin.';errEl.style.display='block';return;}
-  if(!url.includes('script.google.com')){errEl.textContent='Geçerli bir Google Apps Script URL giriniz (script.google.com ile başlamalı).';errEl.style.display='block';return;}
+  const inp  = document.getElementById('gasUrl');
+  const errEl= document.getElementById('setupErr');
+  const btn  = document.getElementById('setupBtn');
 
-  btn.disabled=true;btn.textContent='Bağlanıyor…';
+  errEl.style.display='none';
+  const url = inp.value.trim();
+
+  if(!url){
+    errEl.textContent='Lütfen URL girin.';
+    errEl.style.display='block';
+    return;
+  }
+  if(!url.startsWith('https://script.google.com')){
+    errEl.textContent='URL "https://script.google.com" ile başlamalıdır.';
+    errEl.style.display='block';
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent='Bağlanıyor…';
+  errEl.style.display='none';
 
   try{
-    // Sadece GET ile test et — no-cors gerekmez, yanıt okunabilir
-    const r = await fetch(url+'?action=get');
-    if(!r.ok) throw new Error('Sunucu yanıt vermedi (HTTP '+r.status+'). Deploy ayarlarını kontrol edin.');
+    const testUrl = url + (url.includes('?') ? '&' : '?') + 'action=get&t=' + Date.now();
+    const r = await fetch(testUrl);
+
+    if(!r.ok){
+      throw new Error('Sunucu HTTP ' + r.status + ' döndürdü.');
+    }
+
     const text = await r.text();
-    if(text.trim().startsWith('<')) throw new Error('Script HTML döndürdü. Deploy → Erişim: "Herkes" seçili olmalı.');
+
+    if(!text || text.trim()===''){
+      throw new Error('Sunucu boş yanıt döndürdü.');
+    }
+    if(text.trim().startsWith('<')){
+      throw new Error('Script HTML sayfası döndürdü — bu genellikle "Erişim: Herkes" seçilmediğinde olur.');
+    }
+
     let data;
-    try{ data=JSON.parse(text); } catch(pe){ throw new Error('Geçersiz yanıt. Script doğru deploy edilmemiş olabilir.'); }
-    if(data.error) throw new Error(data.error);
+    try{
+      data = JSON.parse(text);
+    }catch(pe){
+      throw new Error('JSON parse hatası. Yanıt: ' + text.substring(0,100));
+    }
 
-    // Bağlantı başarılı — kaydet
-    _url=url;
-    localStorage.setItem('gas_url',url);
+    if(data.error) throw new Error('Script hatası: ' + data.error);
 
-    // İlk yüklemede preloaded dersleri ekle
-    let sc=Array.isArray(data.courses)&&data.courses.length>0?data.courses:[];
-    const ids=new Set(sc.map(c=>c.id));
-    const missing=PRELOADED.filter(p=>!ids.has(p.id));
-    // Eksik preloaded dersleri no-cors POST ile gönder (setup'ta hata vermemesi için fire-and-forget)
+    // Başarılı — kaydet
+    _url = url;
+    localStorage.setItem('gas_url', url);
+
+    // Preloaded dersleri yükle
+    let sc = Array.isArray(data.courses) ? data.courses : [];
+    const ids = new Set(sc.map(c=>c.id));
+    const missing = PRELOADED.filter(p=>!ids.has(p.id));
     for(const p of missing){
-      fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add_course',data:p})}).catch(()=>{});
+      fetch(url, {method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add_course',data:p})}).catch(()=>{});
       sc.push(p);
     }
-    courses=sc;
-    logs=Array.isArray(data.logs)?data.logs:[];
+    courses = sc;
+    logs = Array.isArray(data.logs) ? data.logs : [];
 
-    showPublic();renderSchedule();
-    showToast('Bağlantı başarılı!','success');
-  } catch(e){
-    errEl.innerHTML='❌ '+e.message
-      +'<br><br><strong>Kontrol listesi:</strong>'
-      +'<br>① Deploy türü "Web uygulaması" mı?'
-      +'<br>② "Farklı çalıştır" → "Ben" seçili mi?'
-      +'<br>③ "Erişim" → "Herkes" seçili mi?'
-      +'<br>④ Dağıt butonuna bastıktan sonra Google izin onayladı mı?'
-      +'<br>⑤ En güncel sürümü deploy ettiniz mi? (Yeni sürüm oluştur)';
+    showPublic();
+    renderSchedule();
+    showToast('Bağlantı başarılı!', 'success');
+
+  }catch(e){
+    const msg = e.message || String(e);
+    errEl.innerHTML = '<strong>❌ Hata:</strong> ' + msg
+      + '<br><br><strong>Kontrol listesi:</strong>'
+      + '<br>① Apps Script → Dağıt → Yeni dağıtım'
+      + '<br>② Tür: <em>Web uygulaması</em>'
+      + '<br>③ Farklı çalıştır: <em>Ben (e-posta adresiniz)</em>'
+      + '<br>④ Erişim: <em>Herkes</em> (anonim dahil)'
+      + '<br>⑤ Dağıt → izin ekranında <em>İzin ver</em>'e basın'
+      + '<br>⑥ Çıkan URL'yi buraya yapıştırın (.../exec ile bitmeli)';
     errEl.style.display='block';
-    btn.disabled=false;btn.textContent='Bağlan ve Başlat';
+    btn.disabled=false;
+    btn.textContent='Tekrar Dene';
+  }
+}
+
+async function debugSetup(){
+  const url = document.getElementById('gasUrl').value.trim();
+  if(!url){ alert('Önce URL girin.'); return; }
+  const testUrl = url + (url.includes('?') ? '&' : '?') + 'action=get&t=' + Date.now();
+  try{
+    const r = await fetch(testUrl);
+    const text = await r.text();
+    alert('HTTP: ' + r.status + '\n\nYanıt (ilk 300 karakter):\n' + text.substring(0,300));
+  }catch(e){
+    alert('Fetch hatası: ' + e.message + '\n\nBu genellikle tarayıcı CORS engelinden değil, URL\'nin yanlış olmasından kaynaklanır.');
   }
 }
 function resetSetup(){if(!confirm('Sıfırlanacak, emin misiniz?'))return;localStorage.removeItem('gas_url');location.reload();}
