@@ -307,10 +307,8 @@ let courses=[],logs=[],editingId=null,pendingDelId=null,isAdmin=false;
 let _url = GAS_URL || localStorage.getItem('gas_url') || '';
 
 // ══ API ══
-// Okuma: GET (yanıt okunabilir)
-// Yazma: no-cors POST (CORS engeli yok, yanıt okunamaz ama işlem gerçekleşir)
-async function apiGet(action){
-  const r = await fetch(_url+'?action='+action);
+async function apiGet(){
+  const r = await fetch(_url+'?action=get');
   if(!r.ok) throw new Error('Sunucu hatası: '+r.status);
   const text = await r.text();
   if(text.trim().startsWith('<')) throw new Error('Script erişilemiyor. Deploy ayarlarında Erişim="Herkes" olmalı.');
@@ -319,23 +317,15 @@ async function apiGet(action){
   return d;
 }
 async function apiPost(body){
-  // no-cors ile POST: yanıt okunamaz ama Google Sheet'e ulaşır
+  // no-cors POST: CORS engeli yok, yanıt okunamaz ama sunucuya ulaşır
   await fetch(_url, {
     method:'POST',
     mode:'no-cors',
     headers:{'Content-Type':'text/plain'},
     body:JSON.stringify(body)
   });
-  await new Promise(r=>setTimeout(r,400));
-}
-// Geriye dönük uyumluluk için eski api() fonksiyonu
-async function api(params){
-  if(params.action==='get') return apiGet('get');
-  // Yazma: data parametresi varsa parse et
-  const body = {action: params.action};
-  if(params.data) body.data = params.data;
-  await apiPost(body);
-  return {ok:true};
+  // Sunucunun işlemi tamamlaması için bekle
+  await new Promise(r=>setTimeout(r,600));
 }
 
 // ══ SETUP ══
@@ -392,11 +382,13 @@ async function loadFromServer(quiet=false){
 }
 async function saveToServer(){
   setSB('busy','⏳ Kaydediliyor…');
-  try{await api({action:'set_courses',data:JSON.stringify(courses)});setSB('ok','✓ Kaydedildi');}
-  catch(e){setSB('err','⚠ Kaydetme hatası');throw e;}
+  try{
+    await apiPost({action:'set_courses',data:courses});
+    setSB('ok','✓ Kaydedildi');
+  }catch(e){setSB('err','⚠ Kaydetme hatası');throw e;}
 }
 function logAsync(entry){
-  api({action:'add_log',data:JSON.stringify(entry)}).catch(()=>{});
+  apiPost({action:'add_log',data:entry}).catch(()=>{});
 }
 
 // ══ SLOT HELPERS ══
@@ -483,15 +475,19 @@ async function submitCourse(){
     if(editingId){
       const idx=courses.findIndex(c=>c.id===editingId);if(idx<0){closeAddModal();return;}
       courses[idx]={...courses[idx],instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec};
-      await saveToServer();
-      logAsync({action:'DÜZENLEME',instr,cn,prog:PROGS[prog]?.replace('\n',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
+      const updated=courses[idx];
+      await apiPost({action:'update_course',data:updated});
+      logAsync({action:'DÜZENLEME',instr,cn,prog:PROGS[prog]?.replace('
+',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
       showToast('Ders güncellendi.','success');
     }else{
       const iN=instr.toLowerCase();
       if(courses.filter(c=>c.program===prog&&c.instructor.toLowerCase()===iN&&!isShared(c.courseName)).length>=1){showToast('Bu öğretim üyesi bu programa zaten bir ders eklemiş.','error');btn.disabled=false;btn.textContent='Kaydet';return;}
       const nc={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
-      courses.push(nc);await saveToServer();
-      logAsync({action:'EKLEME',instr,cn,prog:PROGS[prog]?.replace('\n',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
+      courses.push(nc);
+      await apiPost({action:'add_course',data:nc});
+      logAsync({action:'EKLEME',instr,cn,prog:PROGS[prog]?.replace('
+',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
       showToast('Ders eklendi.','success');
     }
     closeAddModal();renderSchedule();if(isAdmin){renderAdminStats();renderAdminManage();}
@@ -510,14 +506,26 @@ function openDelModal(id){
 function closeDelModal(){document.getElementById('delModal').classList.remove('open');pendingDelId=null;}
 async function confirmDelete(){
   if(!pendingDelId)return;
-  const c=courses.find(x=>x.id===pendingDelId);closeDelModal();if(!c)return;
-  const prev=[...courses];courses=courses.filter(x=>x.id!==pendingDelId);
+  const c=courses.find(x=>x.id===pendingDelId);
+  closeDelModal();if(!c)return;
+  // Önce ekrandan kaldır
+  courses=courses.filter(x=>x.id!==pendingDelId);
+  renderSchedule();
+  setSB('busy','⏳ Siliniyor…');
   try{
-    await saveToServer();
-    logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace('\n',' ')||c.program,day:c.day,time:c.timeStart+'-'+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
+    // Sunucuya sadece ID gönder — tüm listeyi değil
+    await apiPost({action:'delete_course',id:c.id});
+    logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace('
+',' ')||c.program,day:c.day,time:c.timeStart+'-'+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
+    setSB('ok','✓ Silindi');
     showToast('Ders silindi.','success');
-  }catch(e){courses=prev;showToast('Silinemedi.','error');}
-  renderSchedule();if(isAdmin){renderAdminStats();renderAdminManage();}
+  }catch(e){
+    // Hata olursa geri al
+    courses.push(c);renderSchedule();
+    setSB('err','⚠ Silinemedi');
+    showToast('Silinemedi: '+e.message,'error');
+  }
+  if(isAdmin){renderAdminStats();renderAdminManage();}
 }
 
 // ══ NAV ══
@@ -561,8 +569,12 @@ async function adminAddCourse(){
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
   const nc={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
   courses.push(nc);
-  try{await saveToServer();logAsync({action:'EKLEME (YÖN)',instr,cn,prog:PROGS[prog]?.replace('\n',' ')||prog,day,time:ts+'-'+te,ua:'yönetici'});showToast('Ders eklendi.','success');renderAdminStats();renderAdminManage();}
-  catch(e){courses.pop();showToast('Eklenemedi.','error');}
+  try{
+    await apiPost({action:'add_course',data:nc});
+    logAsync({action:'EKLEME (YÖN)',instr,cn,prog:PROGS[prog]?.replace('
+',' ')||prog,day,time:ts+'-'+te,ua:'yönetici'});
+    showToast('Ders eklendi.','success');renderAdminStats();renderAdminManage();
+  }catch(e){courses.pop();showToast('Eklenemedi.','error');}
 }
 
 // ══ HELPERS ══
