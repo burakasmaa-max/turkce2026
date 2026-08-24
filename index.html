@@ -336,25 +336,48 @@ async function doSetup(){
   const url=inp.value.trim();
   errEl.style.display='none';
   if(!url){errEl.textContent='Lütfen URL girin.';errEl.style.display='block';return;}
-  if(!url.includes('script.google.com')){errEl.textContent='Geçerli bir Google Apps Script URL\'si giriniz.';errEl.style.display='block';return;}
+  if(!url.includes('script.google.com')){errEl.textContent='Geçerli bir Google Apps Script URL giriniz (script.google.com ile başlamalı).';errEl.style.display='block';return;}
+
   btn.disabled=true;btn.textContent='Bağlanıyor…';
-  _url=url;
+
   try{
-    const data=await api({action:'get'});
-    let sc=Array.isArray(data.courses)&&data.courses.length>0?data.courses:[...PRELOADED];
-    // Preloaded'ları merge et
-    const ids=new Set(sc.map(c=>c.id));
-    PRELOADED.forEach(p=>{if(!ids.has(p.id))sc.push(p);});
-    await api({action:'set_courses',data:JSON.stringify(sc)});
-    courses=sc;logs=Array.isArray(data.logs)?data.logs:[];
+    // Sadece GET ile test et — no-cors gerekmez, yanıt okunabilir
+    const r = await fetch(url+'?action=get');
+    if(!r.ok) throw new Error('Sunucu yanıt vermedi (HTTP '+r.status+'). Deploy ayarlarını kontrol edin.');
+    const text = await r.text();
+    if(text.trim().startsWith('<')) throw new Error('Script HTML döndürdü. Deploy → Erişim: "Herkes" seçili olmalı.');
+    let data;
+    try{ data=JSON.parse(text); } catch(pe){ throw new Error('Geçersiz yanıt. Script doğru deploy edilmemiş olabilir.'); }
+    if(data.error) throw new Error(data.error);
+
+    // Bağlantı başarılı — kaydet
+    _url=url;
     localStorage.setItem('gas_url',url);
+
+    // İlk yüklemede preloaded dersleri ekle
+    let sc=Array.isArray(data.courses)&&data.courses.length>0?data.courses:[];
+    const ids=new Set(sc.map(c=>c.id));
+    const missing=PRELOADED.filter(p=>!ids.has(p.id));
+    // Eksik preloaded dersleri no-cors POST ile gönder (setup'ta hata vermemesi için fire-and-forget)
+    for(const p of missing){
+      fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add_course',data:p})}).catch(()=>{});
+      sc.push(p);
+    }
+    courses=sc;
+    logs=Array.isArray(data.logs)?data.logs:[];
+
     showPublic();renderSchedule();
     showToast('Bağlantı başarılı!','success');
   } catch(e){
-    errEl.innerHTML='❌ '+e.message+'<br><small>Kontrol listesi: 1) Dağıtım türü "Web uygulaması" mı? 2) Erişim "Herkes" seçili mi? 3) En son dağıtım kullanılıyor mu?</small>';
+    errEl.innerHTML='❌ '+e.message
+      +'<br><br><strong>Kontrol listesi:</strong>'
+      +'<br>① Deploy türü "Web uygulaması" mı?'
+      +'<br>② "Farklı çalıştır" → "Ben" seçili mi?'
+      +'<br>③ "Erişim" → "Herkes" seçili mi?'
+      +'<br>④ Dağıt butonuna bastıktan sonra Google izin onayladı mı?'
+      +'<br>⑤ En güncel sürümü deploy ettiniz mi? (Yeni sürüm oluştur)';
     errEl.style.display='block';
     btn.disabled=false;btn.textContent='Bağlan ve Başlat';
-    _url='';
   }
 }
 function resetSetup(){if(!confirm('Sıfırlanacak, emin misiniz?'))return;localStorage.removeItem('gas_url');location.reload();}
