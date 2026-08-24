@@ -408,8 +408,8 @@ async function doSetup(){
       + '<br>② Tür: <em>Web uygulaması</em>'
       + '<br>③ Farklı çalıştır: <em>Ben (e-posta adresiniz)</em>'
       + '<br>④ Erişim: <em>Herkes</em> (anonim dahil)'
-      + '<br>⑤ Dağıt → izin ekranında <em>İzin ver</em>'e basın'
-      + '<br>⑥ Çıkan URL'yi buraya yapıştırın (.../exec ile bitmeli)';
+      + '<br>⑤ Dağıt → izin ekranında <em>İzin ver</em> butonuna basın'
+      + "<br>⑥ Çıkan URL'yi buraya yapıştırın (.../exec ile bitmeli)";
     errEl.style.display='block';
     btn.disabled=false;
     btn.textContent='Tekrar Dene';
@@ -478,7 +478,7 @@ function renderSchedule(){
     html+=`<div class="day-block"><div class="day-title">${day} <span>${dc.length?dc.length+' ders':'boş'}</span></div>
       <div class="sched-scroll"><table class="st">
         <colgroup><col style="width:90px">${PROG_KEYS.map(()=>'<col style="min-width:210px">').join('')}</colgroup>
-        <thead><tr><th class="time-th">SAATLER</th>${PROG_KEYS.map(pk=>`<th class="prog-th">${PROGS[pk].replace('\n','<br>')}</th>`).join('')}</tr></thead><tbody>`;
+        <thead><tr><th class="time-th">SAATLER</th>${PROG_KEYS.map(pk=>`<th class="prog-th">${PROGS[pk].replace(/\n/g,"<br>")}</th>`).join('')}</tr></thead><tbody>`;
     SLOTS.forEach((slot,si)=>{
       html+=`<tr><td class="time-cell">${slot.label}</td>`;
       PROG_KEYS.forEach(pk=>{
@@ -548,8 +548,7 @@ async function submitCourse(){
       courses[idx]={...courses[idx],instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec};
       const updated=courses[idx];
       await apiPost({action:'update_course',data:updated});
-      logAsync({action:'DÜZENLEME',instr,cn,prog:PROGS[prog]?.replace('
-',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
+      logAsync({action:'DÜZENLEME',instr,cn,prog:PROGS[prog]?.replace('',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
       showToast('Ders güncellendi.','success');
     }else{
       const iN=instr.toLowerCase();
@@ -557,8 +556,7 @@ async function submitCourse(){
       const nc={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
       courses.push(nc);
       await apiPost({action:'add_course',data:nc});
-      logAsync({action:'EKLEME',instr,cn,prog:PROGS[prog]?.replace('
-',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
+      logAsync({action:'EKLEME',instr,cn,prog:PROGS[prog]?.replace('',' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
       showToast('Ders eklendi.','success');
     }
     closeAddModal();renderSchedule();if(isAdmin){renderAdminStats();renderAdminManage();}
@@ -586,8 +584,7 @@ async function confirmDelete(){
   try{
     // Sunucuya sadece ID gönder — tüm listeyi değil
     await apiPost({action:'delete_course',id:c.id});
-    logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace('
-',' ')||c.program,day:c.day,time:c.timeStart+'-'+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
+    logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace('',' ')||c.program,day:c.day,time:c.timeStart+'-'+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
     setSB('ok','✓ Silindi');
     showToast('Ders silindi.','success');
   }catch(e){
@@ -631,7 +628,7 @@ async function clearLogs(){
 function renderAdminManage(){
   const nc=courses.filter(c=>!c.id.startsWith('p'));const tb=document.getElementById('manageBody');
   if(!nc.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:18px;color:#888">Henüz yeni ders eklenmemiş.</td></tr>';return;}
-  tb.innerHTML=nc.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.instructor)}</td><td>${esc(c.courseName)}</td><td style="font-size:.71rem">${esc(PROGS[c.program]?.replace('\n',' ')||c.program)}</td><td>${esc(c.day)}</td><td>${esc(c.timeStart)}-${esc(c.timeEnd)}</td><td>${esc(c.section||'')}</td><td style="font-size:.71rem">${fmtDate(c.addedAt)}</td><td style="white-space:nowrap"><button class="btn" style="padding:3px 8px;font-size:.72rem;background:var(--alight);color:var(--accent);border:1px solid var(--accent)" onclick="openEditModal('${c.id}')">Düzenle</button><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem;margin-left:3px" onclick="openDelModal('${c.id}')">Sil</button></td></tr>`).join('');
+  tb.innerHTML=nc.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.instructor)}</td><td>${esc(c.courseName)}</td><td style="font-size:.71rem">${esc(PROGS[c.program]?.replace(/\n/g," ")||c.program)}</td><td>${esc(c.day)}</td><td>${esc(c.timeStart)}-${esc(c.timeEnd)}</td><td>${esc(c.section||'')}</td><td style="font-size:.71rem">${fmtDate(c.addedAt)}</td><td style="white-space:nowrap"><button class="btn" style="padding:3px 8px;font-size:.72rem;background:var(--alight);color:var(--accent);border:1px solid var(--accent)" onclick="openEditModal('${c.id}')">Düzenle</button><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem;margin-left:3px" onclick="openDelModal('${c.id}')">Sil</button></td></tr>`).join('');
 }
 async function adminAddCourse(){
   const instr=document.getElementById('aInstr').value.trim(),cn=document.getElementById('aCourse').value.trim();
@@ -642,8 +639,7 @@ async function adminAddCourse(){
   courses.push(nc);
   try{
     await apiPost({action:'add_course',data:nc});
-    logAsync({action:'EKLEME (YÖN)',instr,cn,prog:PROGS[prog]?.replace('
-',' ')||prog,day,time:ts+'-'+te,ua:'yönetici'});
+    logAsync({action:'EKLEME (YÖN)',instr,cn,prog:PROGS[prog]?.replace('',' ')||prog,day,time:ts+'-'+te,ua:'yönetici'});
     showToast('Ders eklendi.','success');renderAdminStats();renderAdminManage();
   }catch(e){courses.pop();showToast('Eklenemedi.','error');}
 }
