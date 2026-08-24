@@ -267,7 +267,7 @@ table.st td[rowspan]{background:#fff!important}
 <script>
 // ══════════════════════════════════════
 // GAS URL — GitHub'a gömdükten sonra buraya yapıştırın:
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbywm5LhqHiaP5MSOu8xkJXJpjSHRNgxpFjPZyQ8ZPKXnb77wrdt-1zV0p1MQbs2398l/exec';
+const GAS_URL = '';
 // ══════════════════════════════════════
 
 const ADMIN_PW='turkce2026';
@@ -306,21 +306,36 @@ const PRELOADED=[
 let courses=[],logs=[],editingId=null,pendingDelId=null,isAdmin=false;
 let _url = GAS_URL || localStorage.getItem('gas_url') || '';
 
-// ══ API — tümü GET, CORS sorunu yok ══
-async function api(params){
-  // Apps Script GET isteklerini JSONP benzeri yönlendirme ile yanıtlar
-  // Veriyi URL parametresi olarak gönderiyoruz (JSON → base64)
-  const qStr = Object.entries(params)
-    .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):v))
-    .join('&');
-  const r = await fetch(_url+'?'+qStr);
+// ══ API ══
+// Okuma: GET (yanıt okunabilir)
+// Yazma: no-cors POST (CORS engeli yok, yanıt okunamaz ama işlem gerçekleşir)
+async function apiGet(action){
+  const r = await fetch(_url+'?action='+action);
   if(!r.ok) throw new Error('Sunucu hatası: '+r.status);
   const text = await r.text();
-  // Apps Script bazen HTML redirect döner (izin gerekiyor, vb.)
-  if(text.trim().startsWith('<')) throw new Error('Script erişilemiyor. Deploy ayarlarını kontrol edin: Erişim = "Herkes" olmalı.');
+  if(text.trim().startsWith('<')) throw new Error('Script erişilemiyor. Deploy ayarlarında Erişim="Herkes" olmalı.');
   const d = JSON.parse(text);
   if(d.error) throw new Error(d.error);
   return d;
+}
+async function apiPost(body){
+  // no-cors ile POST: yanıt okunamaz ama Google Sheet'e ulaşır
+  await fetch(_url, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify(body)
+  });
+  await new Promise(r=>setTimeout(r,400));
+}
+// Geriye dönük uyumluluk için eski api() fonksiyonu
+async function api(params){
+  if(params.action==='get') return apiGet('get');
+  // Yazma: data parametresi varsa parse et
+  const body = {action: params.action};
+  if(params.data) body.data = params.data;
+  await apiPost(body);
+  return {ok:true};
 }
 
 // ══ SETUP ══
