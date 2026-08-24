@@ -438,12 +438,12 @@ async function loadFromServer(quiet=false){
   if(!quiet)lb(true);
   setSB('busy','⏳ Yükleniyor…');
   try{
-    const data=await api({action:'get'});
+    const data=await apiGet();
     let sc=Array.isArray(data.courses)?data.courses:[];
     logs=Array.isArray(data.logs)?data.logs:[];
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
-    if(miss.length){sc=[...sc,...miss];api({action:'set_courses',data:JSON.stringify(sc)}).catch(()=>{});}
+    if(miss.length){sc=[...sc,...miss];apiPost({action:'set_courses',data:sc}).catch(()=>{});}
     courses=sc;setSB('ok','✓ Güncel');renderSchedule();
   }catch(e){
     setSB('err','⚠ '+e.message);
@@ -623,7 +623,7 @@ function renderLogs(){
 }
 async function clearLogs(){
   if(!confirm('Tüm işlem kaydı silinecek. Emin misiniz?'))return;
-  try{await api({action:'clear_logs'});logs=[];renderLogs();renderAdminStats();showToast('Günlük temizlendi.','success');}catch(e){showToast('Temizlenemedi.','error');}
+  try{await apiPost({action:'clear_logs'});logs=[];renderLogs();renderAdminStats();showToast('Günlük temizlendi.','success');}catch(e){showToast('Temizlenemedi.','error');}
 }
 function renderAdminManage(){
   const nc=courses.filter(c=>!c.id.startsWith('p'));const tb=document.getElementById('manageBody');
