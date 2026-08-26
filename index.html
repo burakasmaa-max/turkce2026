@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Türkçe Eğitimi – Lisansüstü Ders Programı 2026-2027 Güz</title>
+<title>Türkçe Eğitimi Lisansüstü Ders Programı 2026 2027 Güz</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
 :root{--bg:#F7F6F2;--surface:#fff;--border:#E2DDD6;--text:#1A1815;--muted:#6B655C;--accent:#2B4B8C;--alight:#E8EDF6;--success:#2A6B4A;--danger:#8B1F1F;--dlight:#FDECEA;--warn:#7A5F00;--wlight:#FFF8E0;--r:8px}
@@ -21,8 +21,6 @@ header p{font-size:.75rem;opacity:.7;margin-top:2px;font-weight:300}
 .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#6e1818}
 .btn-outline{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}.btn-outline:hover{background:var(--alight)}
 .container{max-width:1100px;margin:0 auto;padding:18px 20px}
-
-/* SETUP */
 .setup-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px}
 .setup-box{background:#fff;border-radius:14px;padding:36px 32px;width:min(520px,100%);box-shadow:0 8px 40px rgba(0,0,0,.12);border-top:4px solid var(--accent)}
 .setup-box h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--accent);margin-bottom:6px}
@@ -38,12 +36,9 @@ header p{font-size:.75rem;opacity:.7;margin-top:2px;font-weight:300}
 .fg input{width:100%;padding:9px 11px;border:2px solid var(--border);border-radius:var(--r);font-size:.85rem;font-family:'Inter',sans-serif;transition:border-color .15s}
 .fg input:focus{outline:none;border-color:var(--accent)}
 .setup-err{color:var(--danger);font-size:.8rem;margin-top:8px;display:none;background:var(--dlight);padding:8px 12px;border-radius:var(--r);line-height:1.5}
-
-/* LOADING */
 .load-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;z-index:999}
 .load-bar.go{transform:scaleX(.75);transition:transform 6s ease-out}
 .load-bar.done{transform:scaleX(1);transition:transform .15s}
-
 .shared-info{background:var(--wlight);border:1px solid #E8D48A;border-radius:var(--r);padding:9px 14px;font-size:.79rem;color:var(--warn);margin-bottom:14px;display:flex;align-items:flex-start;gap:7px}
 .day-block{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 8px rgba(0,0,0,.05);margin-bottom:14px;overflow:hidden}
 .day-title{background:#1e3870;color:#fff;padding:8px 16px;font-size:.87rem;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
@@ -113,18 +108,17 @@ table.st td[rowspan]{background:#fff!important}
 <body>
 <div class="load-bar" id="loadBar"></div>
 
-<!-- SETUP -->
 <div id="setupPage">
   <div class="setup-wrap">
     <div class="setup-box">
       <h2>İlk Kurulum</h2>
-      <p class="setup-sub">Google Sheet'i veritabanı olarak kullanacağız. Yalnızca <strong>bir kez</strong> yapılır.</p>
+      <p class="setup-sub">Google Sheet veritabanı kurulumunu yalnızca bir kez yapmanız yeterlidir.</p>
       <div class="step"><div class="step-num">1</div><div class="step-body"><a href="https://sheets.google.com" target="_blank">sheets.google.com</a>'da yeni boş bir sayfa açın.</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-body"><strong>Uzantılar → Apps Script</strong>'e tıklayın. <code>Kod.gs</code> içini silin, <strong>Code.gs</strong> dosyasındaki kodu yapıştırın, 💾 kaydedin.</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Dağıt → Yeni dağıtım</strong> tıklayın.<br>
-        Tür: <code>Web uygulaması</code> · Farklı çalıştır: <code>Ben</code> · Erişim: <code>Herkes</code><br>
-        <strong>Dağıt</strong>'a basın → izinleri onaylayın → çıkan <strong>URL'yi kopyalayın.</strong></div></div>
-      <div class="step"><div class="step-num">4</div><div class="step-body">URL'yi aşağıya yapıştırın.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Uzantılar bölümünden Apps Script'e tıklayın. Kodu yapıştırıp kaydedin.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Dağıt ve Yeni dağıtım tıklayın.<br>
+        Tür: <code>Web uygulaması</code> Kim olarak: <code>Ben</code> Erişim: <code>Herkes</code><br>
+        URL adresini kopyalayın.</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body">URL adresini aşağıya yapıştırın.</div></div>
       <div class="inp-wrap">
         <div class="fg"><label>Google Apps Script Web App URL</label>
           <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec" onkeydown="if(event.key==='Enter')doSetup()">
@@ -132,19 +126,18 @@ table.st td[rowspan]{background:#fff!important}
         <div class="setup-err" id="setupErr"></div>
         <button class="btn btn-primary" style="margin-top:10px;width:100%;padding:12px" id="setupBtn" onclick="doSetup()">Bağlan ve Başlat</button>
         <div style="margin-top:10px;font-size:.75rem;color:var(--muted)">
-          <a href="#" onclick="debugSetup();return false;" style="color:var(--accent)">Bağlantı sorunu mu var? Buraya tıklayın →</a>
+          <a href="#" onclick="debugSetup();return false;" style="color:var(--accent)">Bağlantı sorunu mu var? Buraya tıklayın</a>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PUBLIC -->
 <div id="publicPage" style="display:none">
   <header>
-    <div><h1>Türkçe Eğitimi – Lisansüstü Ders Programı</h1><p>2026–2027 Güz Yarıyılı · Türkçe Eğitimi Ana Bilim Dalı</p></div>
+    <div><h1>Türkçe Eğitimi Lisansüstü Ders Programı</h1><p>2026 2027 Güz Yarıyılı Türkçe Eğitimi Ana Bilim Dalı</p></div>
     <div class="hright">
-      <span id="syncBadge" class="sync-badge sync-busy">⏳ Yükleniyor…</span>
+      <span id="syncBadge" class="sync-badge sync-busy">⏳ Yükleniyor</span>
       <button class="btn btn-ghost" onclick="openAddModal()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ders Ekle
       </button>
@@ -153,13 +146,12 @@ table.st td[rowspan]{background:#fff!important}
   <div class="container">
     <div class="shared-info">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div><strong>Ortak Dersler:</strong> YL: <em>Bilimsel Araştırma Teknikleri ve Etik</em> | Doktora: <em>İleri Bilimsel Araştırma Teknikleri ve Etik</em> – öğrenciler yalnızca birini seçmelidir.</div>
+      <div><strong>Ortak Dersler:</strong> YL: <em>Bilimsel Araştırma Teknikleri ve Etik</em> | Doktora: <em>İleri Bilimsel Araştırma Teknikleri ve Etik</em> öğrenciler yalnızca birini seçmelidir.</div>
     </div>
     <div id="dayBlocks"></div>
   </div>
 </div>
 
-<!-- ADMIN LOGIN -->
 <div id="adminLoginPage" style="display:none">
   <div class="login-wrap"><div class="login-box">
     <h2>Yönetici Girişi</h2><p>Bu panel yalnızca yetkili kişilere aittir.</p>
@@ -174,12 +166,11 @@ table.st td[rowspan]{background:#fff!important}
   </div></div>
 </div>
 
-<!-- ADMIN PANEL -->
 <div id="adminPage" style="display:none">
   <header>
-    <div><h1>Yönetici Paneli</h1><p>Türkçe Eğitimi Lisansüstü Ders Programı 2026–2027 Güz</p></div>
+    <div><h1>Yönetici Paneli</h1><p>Türkçe Eğitimi Lisansüstü Ders Programı 2026 2027 Güz</p></div>
     <div class="hright">
-      <button class="btn btn-ghost" onclick="showPublic()">← Programa Dön</button>
+      <button class="btn btn-ghost" onclick="showPublic()">Programa Dön</button>
       <button class="btn btn-ghost" onclick="doAdminLogout()">Çıkış</button>
     </div>
   </header>
@@ -195,17 +186,17 @@ table.st td[rowspan]{background:#fff!important}
     <div id="aLogs" style="display:none">
       <div class="sw-wrap">
         <div class="sw-head"><h2>İşlem Günlüğü</h2><button class="btn btn-danger" onclick="clearLogs()">Temizle</button></div>
-        <div style="overflow-x:auto"><table class="lt"><thead><tr><th>#</th><th>Tarih/Saat</th><th>İşlem</th><th>Öğretim Üyesi</th><th>Ders</th><th>Program</th><th>Gün/Saat</th><th>Tarayıcı</th></tr></thead><tbody id="logBody"></tbody></table></div>
+        <div style="overflow-x:auto"><table class="lt"><thead><tr><th>No</th><th>Tarih Saat</th><th>İşlem</th><th>Öğretim Üyesi</th><th>Ders</th><th>Program</th><th>Gün Saat</th><th>Tarayıcı</th></tr></thead><tbody id="logBody"></tbody></table></div>
       </div>
     </div>
     <div id="aManage" style="display:none">
       <div class="sw-wrap">
         <div class="sw-head"><h2>Eklenmiş Dersler</h2></div>
-        <div style="overflow-x:auto"><table class="lt"><thead><tr><th>#</th><th>Öğretim Üyesi</th><th>Ders Adı</th><th>Program</th><th>Gün</th><th>Saat</th><th>Şube</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="manageBody"></tbody></table></div>
+        <div style="overflow-x:auto"><table class="lt"><thead><tr><th>No</th><th>Öğretim Üyesi</th><th>Ders Adı</th><th>Program</th><th>Gün</th><th>Saat</th><th>Şube</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="manageBody"></tbody></table></div>
       </div>
     </div>
     <div id="aAdd" style="display:none">
-      <div class="sw-wrap" style="max-width:540px"><div class="sw-head"><h2>Ders Ekle (Yönetici)</h2></div>
+      <div class="sw-wrap" style="max-width:540px"><div class="sw-head"><h2>Ders Ekle Yönetici</h2></div>
         <div style="padding:20px">
           <div class="fg"><label>Öğretim Üyesi Adı</label><input type="text" id="aInstr" placeholder="Unvan ve isim"></div>
           <div class="fg"><label>Ders Adı</label><input type="text" id="aCourse" placeholder="Dersin tam adı"></div>
@@ -216,7 +207,7 @@ table.st td[rowspan]{background:#fff!important}
           </div>
           <div class="frow">
             <div class="fg"><label>Bitiş</label><select id="aTE"><option>09.20</option><option>10.20</option><option>11.20</option><option>12.20</option><option>13.20</option><option>14.20</option><option>15.20</option><option>16.20</option><option>17.20</option></select></div>
-            <div class="fg"><label>Şube</label><input type="text" id="aSec" placeholder="Şube A, 1. Grup..."></div>
+            <div class="fg"><label>Şube</label><input type="text" id="aSec" placeholder="Şube A, 1. Grup vb"></div>
           </div>
           <button class="btn btn-success" onclick="adminAddCourse()">Dersi Ekle</button>
         </div>
@@ -225,7 +216,7 @@ table.st td[rowspan]{background:#fff!important}
     <div id="aSettings" style="display:none">
       <div class="sw-wrap" style="max-width:520px"><div class="sw-head"><h2>Ayarlar</h2></div>
         <div style="padding:20px;font-size:.83rem">
-          <p style="color:var(--muted);margin-bottom:10px">Öğretim üyelerinin kurulum ekranını görmemesi için GitHub'daki <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px">index.html</code> dosyasında <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px">const GAS_URL = '';</code> satırını bulup şununla değiştirin:</p>
+          <p style="color:var(--muted);margin-bottom:10px">Öğretim üyelerinin kurulum ekranını görmemesi için GitHub ayarlarınızı güncelleyebilirsiniz.</p>
           <div class="code-hint" id="settingsCode"></div>
           <button class="btn btn-danger" style="margin-top:16px;font-size:.78rem" onclick="resetSetup()">Bağlantıyı Sıfırla</button>
         </div>
@@ -234,12 +225,11 @@ table.st td[rowspan]{background:#fff!important}
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
 <div class="overlay" id="addModal">
   <div class="modal">
     <h3 id="modalTitle">Ders Ekle</h3>
-    <div class="limit-info">Her öğretim üyesi her programa en fazla <strong>1 ders</strong> ekleyebilir (ortak dersler hariç).</div>
-    <div class="fg"><label>Adınız / Unvanınız *</label><input type="text" id="fInstr" placeholder="Örn: Doç. Dr. Ahmet Yılmaz"></div>
+    <div class="limit-info">Her öğretim üyesi her programa en fazla <strong>1 farklı ders</strong> ekleyebilir. Aynı dersi bölerek ekleyebilirsiniz.</div>
+    <div class="fg"><label>Adınız veya Unvanınız *</label><input type="text" id="fInstr" placeholder="Örn: Doç. Dr. Ahmet Yılmaz"></div>
     <div class="fg"><label>Ders Adı *</label><input type="text" id="fCourse" placeholder="Dersin tam adı"></div>
     <div class="fg"><label>Program *</label><select id="fProg"><option value="ytto">Yurtdışındaki Türk Çocuklarına Türkçe Öğretimi</option><option value="ydto">Yabancı Dil Olarak Türkçe Öğretimi</option><option value="teyl">Türkçe Eğitimi Tezli Yüksek Lisans</option><option value="doktora">Türkçe Eğitimi Doktora</option></select></div>
     <div class="frow">
@@ -248,7 +238,7 @@ table.st td[rowspan]{background:#fff!important}
     </div>
     <div class="frow">
       <div class="fg"><label>Bitiş *</label><select id="fTE"><option>09.20</option><option>10.20</option><option>11.20</option><option>12.20</option><option>13.20</option><option>14.20</option><option>15.20</option><option>16.20</option><option>17.20</option></select></div>
-      <div class="fg"><label>Şube</label><input type="text" id="fSec" placeholder="Şube A, 1. Grup..."></div>
+      <div class="fg"><label>Şube</label><input type="text" id="fSec" placeholder="Şube A, 1. Grup vb"></div>
     </div>
     <div class="mact">
       <button class="btn btn-outline" onclick="closeAddModal()">İptal</button>
@@ -257,7 +247,6 @@ table.st td[rowspan]{background:#fff!important}
   </div>
 </div>
 
-<!-- DELETE CONFIRM -->
 <div class="overlay" id="delModal">
   <div class="cmodal">
     <div class="icon">🗑️</div><h3>Dersi Silmek İstediğinize Emin Misiniz?</h3>
@@ -268,16 +257,14 @@ table.st td[rowspan]{background:#fff!important}
 <div class="toast-c" id="toastC"></div>
 
 <script>
-// ══════════════════════════════════════
-// GAS URL — GitHub'a gömdükten sonra buraya yapıştırın:
+// GAS URL ayarı
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbywm5LhqHiaP5MSOu8xkJXJpjSHRNgxpFjPZyQ8ZPKXnb77wrdt-1zV0p1MQbs2398l/exec';
-// ══════════════════════════════════════
 
 const ADMIN_PW='turkce2026';
 const PROGS={ytto:'Yurtdışındaki Türk Çocuklarına\nTürkçe Öğretimi',ydto:'Yabancı Dil Olarak\nTürkçe Öğretimi',teyl:'Türkçe Eğitimi\nTezli Yüksek Lisans',doktora:'Türkçe Eğitimi\nDoktora'};
 const PROG_KEYS=['ytto','ydto','teyl','doktora'];
 const DAYS=['PAZARTESİ','SALI','ÇARŞAMBA','PERŞEMBE','CUMA'];
-const SLOTS=[{start:'08.30',end:'09.20',label:'08.30-09.20'},{start:'09.30',end:'10.20',label:'09.30-10.20'},{start:'10.30',end:'11.20',label:'10.30-11.20'},{start:'11.30',end:'12.20',label:'11.30-12.20'},{start:'12.30',end:'13.20',label:'12.30-13.20'},{start:'13.30',end:'14.20',label:'13.30-14.20'},{start:'14.30',end:'15.20',label:'14.30-15.20'},{start:'15.30',end:'16.20',label:'15.30-16.20'},{start:'16.30',end:'17.20',label:'16.30-17.20'}];
+const SLOTS=[{start:'08.30',end:'09.20',label:'08.30 09.20'},{start:'09.30',end:'10.20',label:'09.30 10.20'},{start:'10.30',end:'11.20',label:'10.30 11.20'},{start:'11.30',end:'12.20',label:'11.30 12.20'},{start:'12.30',end:'13.20',label:'12.30 13.20'},{start:'13.30',end:'14.20',label:'13.30 14.20'},{start:'14.30',end:'15.20',label:'14.30 15.20'},{start:'15.30',end:'16.20',label:'15.30 16.20'},{start:'16.30',end:'17.20',label:'16.30 17.20'}];
 const END_OPTS=['09.20','10.20','11.20','12.20','13.20','14.20','15.20','16.20','17.20'];
 const SYL=['bilimsel araştırma teknikleri ve etik','bilimsel araştırma yöntemleri ve etik'];
 const SDR=['ileri bilimsel araştırma teknikleri ve etik'];
@@ -309,50 +296,37 @@ const PRELOADED=[
 let courses=[],logs=[],editingId=null,pendingDelId=null,isAdmin=false;
 let _url = GAS_URL || localStorage.getItem('gas_url') || '';
 
-// ══ API — tümü GET, iOS/Safari/Brave uyumlu ══
 async function apiGet(){
   const r = await fetch(_url+'?action=get&t='+Date.now());
   if(!r.ok) throw new Error('Sunucu hatası: '+r.status);
   const text = await r.text();
-  if(text.trim().startsWith('<')) throw new Error('Script erişilemiyor. Erişim="Herkes" olmalı.');
+  if(text.trim().startsWith('<')) throw new Error('Script erişilemiyor.');
   const d = JSON.parse(text);
   if(d.error) throw new Error(d.error);
   return d;
 }
 async function apiPost(body){
-  // Önce GET ile dene (küçük payload için)
-  // Büyükse veya 404 alırsa hiçbir şey yapma — log'lar gibi kritik olmayan
   const json = JSON.stringify(body);
   const payload = encodeURIComponent(json);
-
-  // URL limiti ~2000 karakter — aşılırsa GET yerine başarılı say
-  // (Apps Script POST CORS'u engelliyor, GET 404 veriyor = ikisi de olmayınca
-  //  en az zararla devam et: local state doğru, sunucu sonraki yüklemede düzelir)
   if(payload.length > 1800) {
-    console.warn('Payload çok büyük, GET atlandı:', body.action);
-    // set_courses gibi büyük işlemler için: lokal state zaten doğru
-    // Kullanıcı sayfayı yenilediğinde sunucudan doğru veri gelecek
-    // Bu yüzden hata fırlatma, sessizce geç
+    console.warn('Payload boyutu büyük atlandı', body.action);
     return {ok:true, _skipped:true};
   }
-
   const url = _url + '?payload=' + payload + '&t=' + Date.now();
   try {
     const r = await fetch(url);
     if(r.status === 404) {
-      // 404: payload çok büyük veya URL yanlış
-      // İşlem muhtemelen ulaşmadı ama hata gösterme — lokal state doğru
-      console.warn('404 alındı, işlem atlandı:', body.action);
+      console.warn('404 alındı işlem atlandı:', body.action);
       return {ok:true, _404:true};
     }
     const text = await r.text();
-    if(text.trim().startsWith('<')) return {ok:true}; // redirect = başarılı
+    if(text.trim().startsWith('<')) return {ok:true};
     try {
       const d = JSON.parse(text);
       if(d.error) throw new Error(d.error);
       return d;
     } catch(pe) {
-      return {ok:true}; // parse hatası = büyük ihtimalle başarılı
+      return {ok:true}; 
     }
   } catch(fetchErr) {
     console.warn('apiPost fetch hatası:', fetchErr.message);
@@ -360,7 +334,6 @@ async function apiPost(body){
   }
 }
 
-// ══ SETUP ══
 async function doSetup(){
   const inp  = document.getElementById('gasUrl');
   const errEl= document.getElementById('setupErr');
@@ -375,7 +348,7 @@ async function doSetup(){
     return;
   }
   if(!url.startsWith('https://script.google.com')){
-    errEl.textContent='URL "https://script.google.com" ile başlamalıdır.';
+    errEl.textContent='URL https://script.google.com ile başlamalıdır.';
     errEl.style.display='block';
     return;
   }
@@ -398,23 +371,21 @@ async function doSetup(){
       throw new Error('Sunucu boş yanıt döndürdü.');
     }
     if(text.trim().startsWith('<')){
-      throw new Error('Script HTML sayfası döndürdü — bu genellikle "Erişim: Herkes" seçilmediğinde olur.');
+      throw new Error('Script HTML sayfası döndürdü.');
     }
 
     let data;
     try{
       data = JSON.parse(text);
     }catch(pe){
-      throw new Error('JSON parse hatası. Yanıt: ' + text.substring(0,100));
+      throw new Error('JSON parse hatası.');
     }
 
     if(data.error) throw new Error('Script hatası: ' + data.error);
 
-    // Başarılı — kaydet
     _url = url;
     localStorage.setItem('gas_url', url);
 
-    // Preloaded dersleri yükle
     let sc = Array.isArray(data.courses) ? data.courses : [];
     const ids = new Set(sc.map(c=>c.id));
     const missing = PRELOADED.filter(p=>!ids.has(p.id));
@@ -431,14 +402,7 @@ async function doSetup(){
 
   }catch(e){
     const msg = e.message || String(e);
-    errEl.innerHTML = '<strong>❌ Hata:</strong> ' + msg
-      + '<br><br><strong>Kontrol listesi:</strong>'
-      + '<br>① Apps Script → Dağıt → Yeni dağıtım'
-      + '<br>② Tür: <em>Web uygulaması</em>'
-      + '<br>③ Farklı çalıştır: <em>Ben (e-posta adresiniz)</em>'
-      + '<br>④ Erişim: <em>Herkes</em> (anonim dahil)'
-      + '<br>⑤ Dağıt → izin ekranında <em>İzin ver</em> butonuna basın'
-      + "<br>⑥ Çıkan URL'yi buraya yapıştırın (.../exec ile bitmeli)";
+    errEl.innerHTML = '<strong>Hata:</strong> ' + msg;
     errEl.style.display='block';
     btn.disabled=false;
     btn.textContent='Tekrar Dene';
@@ -452,30 +416,27 @@ async function debugSetup(){
   try{
     const r = await fetch(testUrl);
     const text = await r.text();
-    alert('HTTP: ' + r.status + '\n\nYanıt (ilk 300 karakter):\n' + text.substring(0,300));
+    alert('HTTP: ' + r.status + '\n\nYanıt:\n' + text.substring(0,300));
   }catch(e){
-    alert('Fetch hatası: ' + e.message + '\n\nBu genellikle tarayıcı CORS engelinden değil, URL\'nin yanlış olmasından kaynaklanır.');
+    alert('Fetch hatası: ' + e.message);
   }
 }
-function resetSetup(){if(!confirm('Sıfırlanacak, emin misiniz?'))return;localStorage.removeItem('gas_url');location.reload();}
+function resetSetup(){if(!confirm('Sıfırlanacak emin misiniz?'))return;localStorage.removeItem('gas_url');location.reload();}
 
-// ══ LOAD / SAVE ══
 function lb(on){const b=document.getElementById('loadBar');b.className='load-bar '+(on?'go':'done');if(!on)setTimeout(()=>b.className='load-bar',300);}
 function setSB(s,m){const b=document.getElementById('syncBadge');if(!b)return;b.className='sync-badge sync-'+s;b.textContent=m;}
 
 async function loadFromServer(quiet=false){
-  // Önce cache'den göster — kullanıcı beklemez
   const cached = localStorage.getItem('cached_courses');
   if(cached && !courses.length){
     try{ courses=JSON.parse(cached); renderSchedule(); }catch(e){}
   }
   if(courses.length && quiet){ 
-    // Arka planda güncelle
     _refreshInBackground();
     return;
   }
   if(!quiet)lb(true);
-  setSB('busy','⏳ Yükleniyor…');
+  setSB('busy','⏳ Yükleniyor');
   try{
     const data=await apiGet();
     let sc=Array.isArray(data.courses)?data.courses:[];
@@ -509,7 +470,7 @@ async function _refreshInBackground(){
   }catch(e){ setSB('err','⚠ Bağlantı hatası'); }
 }
 async function saveToServer(){
-  setSB('busy','⏳ Kaydediliyor…');
+  setSB('busy','⏳ Kaydediliyor');
   try{
     await apiPost({action:'set_courses',data:courses});
     setSB('ok','✓ Kaydedildi');
@@ -519,12 +480,10 @@ function logAsync(entry){
   apiPost({action:'add_log',data:entry}).catch(()=>{});
 }
 
-// ══ SLOT HELPERS ══
 function sBS(t){return SLOTS.findIndex(s=>s.start===t);}
 function sBE(t){return SLOTS.findIndex(s=>s.end===t);}
 function span(c){const si=sBS(c.timeStart),ei=sBE(c.timeEnd);if(si<0||ei<0)return 1;return Math.max(1,ei-si+1);}
 
-// ══ RENDER ══
 function renderSchedule(){
   const cont=document.getElementById('dayBlocks');let html='';
   DAYS.forEach(day=>{
@@ -559,7 +518,6 @@ function renderSchedule(){
   cont.innerHTML=html;
 }
 
-// ══ SYNC END ══
 function syncEnd(sId,eId){
   const si=SLOTS.findIndex(s=>s.start===document.getElementById(sId).value);
   const eSel=document.getElementById(eId);const cur=eSel.value;eSel.innerHTML='';
@@ -567,7 +525,6 @@ function syncEnd(sId,eId){
   if(!eSel.value||sBE(eSel.value)<si)eSel.value=END_OPTS[si];
 }
 
-// ══ ADD/EDIT ══
 function openAddModal(){
   editingId=null;
   document.getElementById('modalTitle').textContent='Ders Ekle';
@@ -598,15 +555,20 @@ async function submitCourse(){
   const sec=document.getElementById('fSec').value.trim();
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
   if(sBE(te)<sBS(ts)){showToast('Bitiş saati başlangıçtan önce olamaz.','error');return;}
-  // Limit kontrolü
-  if(!editingId){
-    const iN=instr.toLowerCase();
-    if(courses.filter(c=>c.program===prog&&c.instructor.toLowerCase()===iN&&!isShared(c.courseName)).length>=1){
-      showToast('Bu öğretim üyesi bu programa zaten bir ders eklemiş.','error');return;
+  
+  // YENİ EKLENEN LİMİT KONTROLÜ
+  const iN = instr.toLowerCase();
+  const cnN = cn.toLowerCase();
+  const otherCourses = courses.filter(c => c.program === prog && c.instructor.toLowerCase() === iN && c.id !== editingId && !isShared(c.courseName));
+
+  if (otherCourses.length > 0) {
+    const hasDifferentCourse = otherCourses.some(c => c.courseName.toLowerCase() !== cnN);
+    if (hasDifferentCourse) {
+      showToast('Aynı programa sadece 1 farklı ders ekleyebilirsiniz. Bölünmüş derslerin isimleri tamamen aynı olmalıdır.', 'error');
+      return;
     }
   }
 
-  // ÖNCE lokal güncelle ve ekranı göster — anında
   let savedCourse;
   if(editingId){
     const idx=courses.findIndex(c=>c.id===editingId);if(idx<0){closeAddModal();return;}
@@ -622,14 +584,12 @@ async function submitCourse(){
   if(isAdmin){renderAdminStats();renderAdminManage();}
   showToast(editingId?'Ders güncellendi.':'Ders eklendi.','success');
 
-  // ARKA PLANDA sunucuya kaydet
   const action = editingId ? 'update_course' : 'add_course';
   const logAction = editingId ? 'DÜZENLEME' : 'EKLEME';
-  apiPost({action, data:savedCourse}).catch(e=>console.warn('Sunucu sync hatası:',e));
-  logAsync({action:logAction,instr,cn,prog:PROGS[prog]?.replace(/\n/g,' ')||prog,day,time:ts+'-'+te,ua:navigator.userAgent.substring(0,100)});
+  apiPost({action, data:savedCourse}).catch(e=>console.warn('Sunucu senkronizasyon hatası:',e));
+  logAsync({action:logAction,instr,cn,prog:PROGS[prog]?.replace(/\n/g,' ')||prog,day,time:ts+' '+te,ua:navigator.userAgent.substring(0,100)});
 }
 
-// ══ DELETE ══
 function openDelModal(id){
   const c=courses.find(x=>x.id===id);if(!c)return;
   pendingDelId=id;
@@ -643,7 +603,6 @@ async function confirmDelete(){
   const c=courses.find(x=>x.id===pendingDelId);
   closeDelModal();if(!c)return;
 
-  // Lokal güncelle ve ANINDA göster
   courses=courses.filter(x=>x.id!==pendingDelId);
   localStorage.setItem('cached_courses', JSON.stringify(courses));
   renderSchedule();
@@ -651,19 +610,16 @@ async function confirmDelete(){
   showToast('Ders silindi.','success');
   setSB('ok','✓ Silindi');
 
-  // Arka planda sunucuya gönder
-  apiPost({action:'delete_course',id:c.id}).catch(e=>console.warn('Silme sync:',e));
-  logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace(/\n/g,' ')||c.program,day:c.day,time:c.timeStart+'-'+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
+  apiPost({action:'delete_course',id:c.id}).catch(e=>console.warn('Silme senkronizasyonu:',e));
+  logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace(/\n/g,' ')||c.program,day:c.day,time:c.timeStart+' '+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
 }
 
-// ══ NAV ══
 function showPublic(){['setupPage','adminLoginPage','adminPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('publicPage').style.display='';loadFromServer(true);}
 function showAdminLogin(){['setupPage','publicPage','adminPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('adminLoginPage').style.display='';document.getElementById('adminPwInput').value='';document.getElementById('loginError').style.display='none';}
 function doAdminLogin(){if(document.getElementById('adminPwInput').value===ADMIN_PW){isAdmin=true;showAdminPanel();}else document.getElementById('loginError').style.display='block';}
 function doAdminLogout(){isAdmin=false;showPublic();}
 function showAdminPanel(){['setupPage','publicPage','adminLoginPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('adminPage').style.display='';loadFromServer(false).then(renderAdminStats);}
 
-// ══ ADMIN TABS ══
 function adminTab(tab,btn){
   document.querySelectorAll('.anav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
   ['aStats','aLogs','aManage','aAdd','aSettings'].forEach(id=>document.getElementById(id).style.display='none');
@@ -688,7 +644,7 @@ async function clearLogs(){
 function renderAdminManage(){
   const nc=courses.filter(c=>!c.id.startsWith('p'));const tb=document.getElementById('manageBody');
   if(!nc.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:18px;color:#888">Henüz yeni ders eklenmemiş.</td></tr>';return;}
-  tb.innerHTML=nc.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.instructor)}</td><td>${esc(c.courseName)}</td><td style="font-size:.71rem">${esc(PROGS[c.program]?.replace(/\n/g," ")||c.program)}</td><td>${esc(c.day)}</td><td>${esc(c.timeStart)}-${esc(c.timeEnd)}</td><td>${esc(c.section||'')}</td><td style="font-size:.71rem">${fmtDate(c.addedAt)}</td><td style="white-space:nowrap"><button class="btn" style="padding:3px 8px;font-size:.72rem;background:var(--alight);color:var(--accent);border:1px solid var(--accent)" onclick="openEditModal('${c.id}')">Düzenle</button><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem;margin-left:3px" onclick="openDelModal('${c.id}')">Sil</button></td></tr>`).join('');
+  tb.innerHTML=nc.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.instructor)}</td><td>${esc(c.courseName)}</td><td style="font-size:.71rem">${esc(PROGS[c.program]?.replace(/\n/g," ")||c.program)}</td><td>${esc(c.day)}</td><td>${esc(c.timeStart)} ${esc(c.timeEnd)}</td><td>${esc(c.section||'')}</td><td style="font-size:.71rem">${fmtDate(c.addedAt)}</td><td style="white-space:nowrap"><button class="btn" style="padding:3px 8px;font-size:.72rem;background:var(--alight);color:var(--accent);border:1px solid var(--accent)" onclick="openEditModal('${c.id}')">Düzenle</button><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem;margin-left:3px" onclick="openDelModal('${c.id}')">Sil</button></td></tr>`).join('');
 }
 async function adminAddCourse(){
   const instr=document.getElementById('aInstr').value.trim(),cn=document.getElementById('aCourse').value.trim();
@@ -699,17 +655,15 @@ async function adminAddCourse(){
   courses.push(nc);
   try{
     await apiPost({action:'add_course',data:nc});
-    logAsync({action:'EKLEME (YÖN)',instr,cn,prog:PROGS[prog]?.replace('',' ')||prog,day,time:ts+'-'+te,ua:'yönetici'});
+    logAsync({action:'EKLEME YÖN',instr,cn,prog:PROGS[prog]?.replace('',' ')||prog,day,time:ts+' '+te,ua:'yönetici'});
     showToast('Ders eklendi.','success');renderAdminStats();renderAdminManage();
   }catch(e){courses.pop();showToast('Eklenemedi.','error');}
 }
 
-// ══ HELPERS ══
 function showToast(msg,type=''){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.getElementById('toastC').appendChild(t);setTimeout(()=>t.remove(),3400);}
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDate(iso){try{const d=new Date(iso);return d.toLocaleDateString('tr-TR')+' '+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});}catch(e){return iso||'';}}
 
-// ══ INIT ══
 syncEnd('fTS','fTE');syncEnd('aTS','aTE');
 if(new URLSearchParams(location.search).get('admin')==='1')showAdminLogin();
 else if(_url){showPublic();}
