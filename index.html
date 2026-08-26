@@ -33,8 +33,8 @@ header p{font-size:.75rem;opacity:.7;margin-top:2px;font-weight:300}
 .inp-wrap{margin-top:20px;border-top:1px solid var(--border);padding-top:18px}
 .fg{margin-bottom:10px}
 .fg label{display:block;font-size:.79rem;font-weight:600;color:var(--muted);margin-bottom:5px}
-.fg input{width:100%;padding:9px 11px;border:2px solid var(--border);border-radius:var(--r);font-size:.85rem;font-family:'Inter',sans-serif;transition:border-color .15s}
-.fg input:focus{outline:none;border-color:var(--accent)}
+.fg input,.fg select{width:100%;padding:9px 11px;border:2px solid var(--border);border-radius:var(--r);font-size:.85rem;font-family:'Inter',sans-serif;transition:border-color .15s;background:#fff}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--accent)}
 .setup-err{color:var(--danger);font-size:.8rem;margin-top:8px;display:none;background:var(--dlight);padding:8px 12px;border-radius:var(--r);line-height:1.5}
 .load-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;z-index:999}
 .load-bar.go{transform:scaleX(.75);transition:transform 6s ease-out}
@@ -44,10 +44,7 @@ header p{font-size:.75rem;opacity:.7;margin-top:2px;font-weight:300}
 .day-title{background:#1e3870;color:#fff;padding:8px 16px;font-size:.87rem;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
 .day-title span{opacity:.55;font-size:.73rem;font-weight:400}
 .sched-scroll{overflow-x:auto}
-
-/* MOBIL TABLO DUZELTMESI */
 table.st{width:100%;min-width:960px;border-collapse:collapse;font-size:.78rem;table-layout:fixed}
-
 table.st th{background:var(--accent);color:#fff;font-weight:600;padding:8px 10px;text-align:center;font-size:.73rem;letter-spacing:.02em;white-space:nowrap}
 table.st th.time-th{width:90px;text-align:left;padding-left:10px}
 table.st th.prog-th{min-width:210px}
@@ -73,7 +70,6 @@ table.st td[rowspan]{background:#fff!important}
 .modal h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--accent);font-family:'Playfair Display',serif}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.limit-info{background:var(--alight);border:1px solid #C5D3EC;border-radius:var(--r);padding:8px 12px;font-size:.78rem;color:var(--accent);margin-bottom:11px}
 .cmodal{background:#fff;border-radius:12px;padding:26px;width:min(370px,96vw);box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center}
 .cmodal .icon{font-size:2rem;margin-bottom:8px}
 .cmodal h3{font-size:.93rem;font-weight:700;margin-bottom:5px}
@@ -118,7 +114,7 @@ table.st td[rowspan]{background:#fff!important}
       <p class="setup-sub">Google Sheet veritabanı kurulumunu yalnızca bir kez yapmanız yeterlidir.</p>
       <div class="step"><div class="step-num">1</div><div class="step-body"><a href="https://sheets.google.com" target="_blank">sheets.google.com</a> adresinde yeni boş bir sayfa açın.</div></div>
       <div class="step"><div class="step-num">2</div><div class="step-body">Uzantılar bölümünden Apps Script alanına tıklayın. Kodu yapıştırıp kaydedin.</div></div>
-      <div class="step"><div class="step-num">3</div><div class="step-body">Dağıt ve Yeni dağıtım tıklayın.<br>
+      <div class="step"><div class="step-num">3</div><div class="step-body">Dağıt ve Yeni dağıtım menüsünü tıklayın.<br>
         Tür: <code>Web uygulaması</code> Kim olarak: <code>Ben</code> Erişim: <code>Herkes</code><br>
         URL adresini kopyalayın.</div></div>
       <div class="step"><div class="step-num">4</div><div class="step-body">URL adresini aşağıya yapıştırın.</div></div>
@@ -180,12 +176,36 @@ table.st td[rowspan]{background:#fff!important}
   <div class="container">
     <div class="anav">
       <button class="anav-btn active" onclick="adminTab('stats',this)">📊 Genel Bakış</button>
-      <button class="anav-btn" onclick="adminTab('logs',this)">📋 İşlem Günlüğü</button>
+      <button class="anav-btn" onclick="adminTab('catalog',this)">📚 Katalog Yönetimi</button>
       <button class="anav-btn" onclick="adminTab('manage',this)">🗂️ Tüm Dersler</button>
       <button class="anav-btn" onclick="adminTab('add',this)">➕ Ders Ekle</button>
+      <button class="anav-btn" onclick="adminTab('logs',this)">📋 İşlem Günlüğü</button>
       <button class="anav-btn" onclick="adminTab('settings',this)">⚙️ Ayarlar</button>
     </div>
     <div id="aStats"><div class="stats-row" id="statsRow"></div></div>
+
+    <div id="aCatalog" style="display:none">
+      <div class="sw-wrap">
+        <div class="sw-head"><h2>Ders ve Öğretim Üyesi Kataloğu</h2></div>
+        <div style="padding:20px">
+          <p style="font-size:.83rem;color:var(--muted);margin-bottom:10px">Excel tablonuzdan kopyaladığınız verileri aşağıdaki alana yapıştırın. Sütun sıralaması şu şekilde olmalıdır: <strong>Program Kodu | Ders Adı | Öğretim Üyesi</strong>.</p>
+          <p style="font-size:.8rem;color:var(--accent);margin-bottom:10px">Geçerli Program Kodları: <strong>ytto, ydto, teyl, doktora</strong></p>
+          <textarea id="catInput" style="width:100%;height:150px;padding:10px;font-family:monospace;border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px" placeholder="ytto&#9;Bilimsel Araştırma Teknikleri&#9;Prof. Dr. Ahmet Yılmaz"></textarea>
+          <button class="btn btn-primary" onclick="importCatalog()">Verileri İçe Aktar</button>
+
+          <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:10px">
+            <h3 style="font-size:.9rem;margin-bottom:10px">Mevcut Katalog</h3>
+            <div style="overflow-x:auto;max-height:400px">
+              <table class="lt">
+                <thead><tr><th>Program</th><th>Ders Adı</th><th>Öğretim Üyesi</th><th>İşlem</th></tr></thead>
+                <tbody id="catBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="aLogs" style="display:none">
       <div class="sw-wrap">
         <div class="sw-head"><h2>İşlem Günlüğü</h2><button class="btn btn-danger" onclick="clearLogs()">Temizle</button></div>
@@ -201,9 +221,10 @@ table.st td[rowspan]{background:#fff!important}
     <div id="aAdd" style="display:none">
       <div class="sw-wrap" style="max-width:540px"><div class="sw-head"><h2>Ders Ekle Yönetici</h2></div>
         <div style="padding:20px">
-          <div class="fg"><label>Öğretim Üyesi Adı</label><input type="text" id="aInstr" placeholder="Unvan ve isim"></div>
-          <div class="fg"><label>Ders Adı</label><input type="text" id="aCourse" placeholder="Dersin tam adı"></div>
-          <div class="fg"><label>Program</label><select id="aProg"><option value="ytto">Yurtdışındaki Türk Çocuklarına Türkçe Öğretimi</option><option value="ydto">Yabancı Dil Olarak Türkçe Öğretimi</option><option value="teyl">Türkçe Eğitimi Tezli Yüksek Lisans</option><option value="doktora">Türkçe Eğitimi Doktora</option></select></div>
+          <div class="fg"><label>Program</label><select id="aProg" onchange="onAdminProgChange()"><option value="ytto">Yurtdışındaki Türk Çocuklarına Türkçe Öğretimi</option><option value="ydto">Yabancı Dil Olarak Türkçe Öğretimi</option><option value="teyl">Türkçe Eğitimi Tezli Yüksek Lisans</option><option value="doktora">Türkçe Eğitimi Doktora</option></select></div>
+          <div class="fg"><label>Ders Adı</label><select id="aCourse" onchange="onAdminCourseChange()"></select></div>
+          <div class="fg"><label>Öğretim Üyesi Adı</label><select id="aInstr"></select></div>
+          
           <div class="frow">
             <div class="fg"><label>Gün</label><select id="aDay"><option>PAZARTESİ</option><option>SALI</option><option>ÇARŞAMBA</option><option>PERŞEMBE</option><option>CUMA</option></select></div>
             <div class="fg"><label>Başlangıç</label><select id="aTS" onchange="syncEnd('aTS','aTE')"><option>08.30</option><option>09.30</option><option>10.30</option><option>11.30</option><option>12.30</option><option>13.30</option><option>14.30</option><option>15.30</option><option>16.30</option></select></div>
@@ -231,10 +252,11 @@ table.st td[rowspan]{background:#fff!important}
 <div class="overlay" id="addModal">
   <div class="modal">
     <h3 id="modalTitle">Ders Ekle</h3>
-    <div class="limit-info">Her öğretim üyesi her programa en fazla <strong>1 farklı ders</strong> ekleyebilir. Aynı dersi bölerek ekleyebilirsiniz.</div>
-    <div class="fg"><label>Adınız veya Unvanınız *</label><input type="text" id="fInstr" placeholder="Örn: Doç. Dr. Ahmet Yılmaz"></div>
-    <div class="fg"><label>Ders Adı *</label><input type="text" id="fCourse" placeholder="Dersin tam adı"></div>
-    <div class="fg"><label>Program *</label><select id="fProg"><option value="ytto">Yurtdışındaki Türk Çocuklarına Türkçe Öğretimi</option><option value="ydto">Yabancı Dil Olarak Türkçe Öğretimi</option><option value="teyl">Türkçe Eğitimi Tezli Yüksek Lisans</option><option value="doktora">Türkçe Eğitimi Doktora</option></select></div>
+    
+    <div class="fg"><label>Program *</label><select id="fProg" onchange="onProgChange()"><option value="ytto">Yurtdışındaki Türk Çocuklarına Türkçe Öğretimi</option><option value="ydto">Yabancı Dil Olarak Türkçe Öğretimi</option><option value="teyl">Türkçe Eğitimi Tezli Yüksek Lisans</option><option value="doktora">Türkçe Eğitimi Doktora</option></select></div>
+    <div class="fg"><label>Ders Adı *</label><select id="fCourse" onchange="onCourseChange()"></select></div>
+    <div class="fg"><label>Adınız veya Unvanınız *</label><select id="fInstr"></select></div>
+    
     <div class="frow">
       <div class="fg"><label>Gün *</label><select id="fDay"><option>PAZARTESİ</option><option>SALI</option><option>ÇARŞAMBA</option><option>PERŞEMBE</option><option>CUMA</option></select></div>
       <div class="fg"><label>Başlangıç *</label><select id="fTS" onchange="syncEnd('fTS','fTE')"><option>08.30</option><option>09.30</option><option>10.30</option><option>11.30</option><option>12.30</option><option>13.30</option><option>14.30</option><option>15.30</option><option>16.30</option></select></div>
@@ -261,7 +283,7 @@ table.st td[rowspan]{background:#fff!important}
 
 <script>
 // GAS URL ayarı
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzT75OxxZZ-krhNJ3wxQRp_hY3d4rFB6iY92BZbOeOrZl0KZNLaAaiml_9MBRhzajvQ/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbywm5LhqHiaP5MSOu8xkJXJpjSHRNgxpFjPZyQ8ZPKXnb77wrdt-1zV0p1MQbs2398l/exec';
 
 const ADMIN_PW='turkce2026';
 const PROGS={ytto:'Yurtdışındaki Türk Çocuklarına\nTürkçe Öğretimi',ydto:'Yabancı Dil Olarak\nTürkçe Öğretimi',teyl:'Türkçe Eğitimi\nTezli Yüksek Lisans',doktora:'Türkçe Eğitimi\nDoktora'};
@@ -296,7 +318,7 @@ const PRELOADED=[
   {id:'p20',instructor:'Prof. Dr. Bayram BIÇAK',                courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'CUMA',     timeStart:'11.30',timeEnd:'14.20',section:'Şube 6',addedAt:'2026-08-01T09:00:00'},
 ];
 
-let courses=[],logs=[],editingId=null,pendingDelId=null,isAdmin=false;
+let courses=[],logs=[],catalog=[],editingId=null,pendingDelId=null,isAdmin=false;
 let _url = GAS_URL || localStorage.getItem('gas_url') || '';
 
 async function apiGet(){
@@ -309,14 +331,12 @@ async function apiGet(){
   return d;
 }
 
-// KAYDETME ALTYAPISI GUCLENDIRILDI
+// POST ISTEGI YENILENDI 
 async function apiPost(body){
   if(!_url) return {ok:false};
   try {
     await fetch(_url, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(body)
     });
     return { ok: true };
@@ -332,28 +352,14 @@ async function doSetup(){
   const btn  = document.getElementById('setupBtn');
   errEl.style.display='none';
   const url = inp.value.trim();
-  if(!url){
-    errEl.textContent='Lütfen URL girin.';
-    errEl.style.display='block';
-    return;
-  }
-  if(!url.startsWith('https://script.google.com')){
-    errEl.textContent='URL https://script.google.com ile başlamalıdır.';
-    errEl.style.display='block';
-    return;
-  }
-  btn.disabled=true;
-  btn.textContent='Bağlanıyor…';
-  errEl.style.display='none';
+  if(!url){ errEl.textContent='Lütfen URL girin.'; errEl.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Bağlanıyor…'; errEl.style.display='none';
 
   try{
     const testUrl = url + (url.includes('?') ? '&' : '?') + 'action=get&t=' + Date.now();
     const r = await fetch(testUrl);
     if(!r.ok) throw new Error('Sunucu HTTP ' + r.status + ' döndürdü.');
     const text = await r.text();
-    if(!text || text.trim()==='') throw new Error('Sunucu boş yanıt döndürdü.');
-    if(text.trim().startsWith('<')) throw new Error('Script HTML sayfası döndürdü.');
-
     let data;
     try{ data = JSON.parse(text); }catch(pe){ throw new Error('JSON parse hatası.'); }
     if(data.error) throw new Error('Script hatası: ' + data.error);
@@ -370,6 +376,7 @@ async function doSetup(){
     }
     courses = sc;
     logs = Array.isArray(data.logs) ? data.logs : [];
+    catalog = Array.isArray(data.catalog) ? data.catalog : [];
 
     showPublic();
     renderSchedule();
@@ -377,8 +384,7 @@ async function doSetup(){
   }catch(e){
     errEl.innerHTML = '<strong>Hata:</strong> ' + e.message;
     errEl.style.display='block';
-    btn.disabled=false;
-    btn.textContent='Tekrar Dene';
+    btn.disabled=false; btn.textContent='Tekrar Dene';
   }
 }
 
@@ -414,12 +420,15 @@ async function loadFromServer(quiet=false){
     const data=await apiGet();
     let sc=Array.isArray(data.courses)?data.courses:[];
     logs=Array.isArray(data.logs)?data.logs:[];
+    catalog=Array.isArray(data.catalog)?data.catalog:[];
+    
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
     if(miss.length){sc=[...sc,...miss];apiPost({action:'set_courses',data:sc}).catch(()=>{});}
     courses=sc;
     localStorage.setItem('cached_courses', JSON.stringify(courses));
     setSB('ok','✓ Güncel');renderSchedule();
+    if(isAdmin) renderCatalog();
   }catch(e){
     setSB('err','⚠ Bağlantı hatası');
     if(!courses.length){
@@ -434,21 +443,18 @@ async function _refreshInBackground(){
     const data=await apiGet();
     let sc=Array.isArray(data.courses)?data.courses:[];
     logs=Array.isArray(data.logs)?data.logs:[];
+    catalog=Array.isArray(data.catalog)?data.catalog:[];
+    
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
     if(miss.length){sc=[...sc,...miss];}
     courses=sc;
     localStorage.setItem('cached_courses', JSON.stringify(courses));
     setSB('ok','✓ Güncel');renderSchedule();
+    if(isAdmin) renderCatalog();
   }catch(e){ setSB('err','⚠ Bağlantı hatası'); }
 }
-async function saveToServer(){
-  setSB('busy','⏳ Kaydediliyor');
-  try{
-    await apiPost({action:'set_courses',data:courses});
-    setSB('ok','✓ Kaydedildi');
-  }catch(e){setSB('err','⚠ Kaydetme hatası');throw e;}
-}
+
 function logAsync(entry){
   apiPost({action:'add_log',data:entry}).catch(()=>{});
 }
@@ -457,7 +463,6 @@ function sBS(t){return SLOTS.findIndex(s=>s.start===t);}
 function sBE(t){return SLOTS.findIndex(s=>s.end===t);}
 function span(c){const si=sBS(c.timeStart),ei=sBE(c.timeEnd);if(si<0||ei<0)return 1;return Math.max(1,ei-si+1);}
 
-// ÇAKIŞAN DERSLERI BIRLESTIRME MANTIGI
 function renderSchedule(){
   const cont=document.getElementById('dayBlocks');let html='';
   DAYS.forEach(day=>{
@@ -516,49 +521,105 @@ function syncEnd(sId,eId){
   if(!eSel.value||sBE(eSel.value)<si)eSel.value=END_OPTS[si];
 }
 
+// KATALOG LISTE MANTIGI
+function popCourses(progVal, selCourse) {
+  const cSel = document.getElementById('fCourse');
+  cSel.innerHTML = '<option value="">Ders Seçiniz</option>';
+  const coursesForProg = [...new Set(catalog.filter(c => c.prog === progVal).map(c => c.cName))];
+  coursesForProg.forEach(cn => {
+    const o = document.createElement('option');
+    o.value = cn; o.textContent = cn;
+    if(cn === selCourse) o.selected = true;
+    cSel.appendChild(o);
+  });
+  popInstr(progVal, selCourse || '', null);
+}
+
+function popInstr(progVal, courseVal, selInstr) {
+  const iSel = document.getElementById('fInstr');
+  iSel.innerHTML = '<option value="">Öğretim Üyesi Seçiniz</option>';
+  if(!courseVal) return;
+  const instrForCourse = [...new Set(catalog.filter(c => c.prog === progVal && c.cName === courseVal).map(c => c.instr))];
+  instrForCourse.forEach(iN => {
+    const o = document.createElement('option');
+    o.value = iN; o.textContent = iN;
+    if(iN === selInstr) o.selected = true;
+    iSel.appendChild(o);
+  });
+}
+
+function onProgChange() { popCourses(document.getElementById('fProg').value, null); }
+function onCourseChange() { popInstr(document.getElementById('fProg').value, document.getElementById('fCourse').value, null); }
+
+// YONETICI LISTE MANTIGI
+function popAdminCourses(progVal, selCourse) {
+  const cSel = document.getElementById('aCourse');
+  cSel.innerHTML = '<option value="">Ders Seçiniz</option>';
+  const coursesForProg = [...new Set(catalog.filter(c => c.prog === progVal).map(c => c.cName))];
+  coursesForProg.forEach(cn => {
+    const o = document.createElement('option');
+    o.value = cn; o.textContent = cn;
+    if(cn === selCourse) o.selected = true;
+    cSel.appendChild(o);
+  });
+  popAdminInstr(progVal, selCourse || '', null);
+}
+function popAdminInstr(progVal, courseVal, selInstr) {
+  const iSel = document.getElementById('aInstr');
+  iSel.innerHTML = '<option value="">Öğretim Üyesi Seçiniz</option>';
+  if(!courseVal) return;
+  const instrForCourse = [...new Set(catalog.filter(c => c.prog === progVal && c.cName === courseVal).map(c => c.instr))];
+  instrForCourse.forEach(iN => {
+    const o = document.createElement('option');
+    o.value = iN; o.textContent = iN;
+    if(iN === selInstr) o.selected = true;
+    iSel.appendChild(o);
+  });
+}
+function onAdminProgChange() { popAdminCourses(document.getElementById('aProg').value, null); }
+function onAdminCourseChange() { popAdminInstr(document.getElementById('aProg').value, document.getElementById('aCourse').value, null); }
+
+
 function openAddModal(){
   editingId=null;
   document.getElementById('modalTitle').textContent='Ders Ekle';
   document.getElementById('modalSaveBtn').textContent='Kaydet';
-  ['fInstr','fCourse','fSec'].forEach(i=>document.getElementById(i).value='');
-  document.getElementById('fProg').value='ytto';document.getElementById('fDay').value='PAZARTESİ';
-  document.getElementById('fTS').value='08.30';syncEnd('fTS','fTE');
+  document.getElementById('fSec').value='';
+  document.getElementById('fProg').value='ytto';
+  popCourses('ytto', null);
+  document.getElementById('fDay').value='PAZARTESİ';
+  document.getElementById('fTS').value='08.30';
+  syncEnd('fTS','fTE');
   document.getElementById('addModal').classList.add('open');
 }
+
 function openEditModal(id){
   const c=courses.find(x=>x.id===id);if(!c)return;
   editingId=id;
   document.getElementById('modalTitle').textContent='Ders Düzenle';
   document.getElementById('modalSaveBtn').textContent='Güncelle';
-  document.getElementById('fInstr').value=c.instructor;document.getElementById('fCourse').value=c.courseName;
-  document.getElementById('fProg').value=c.program;document.getElementById('fDay').value=c.day;
-  document.getElementById('fTS').value=c.timeStart;syncEnd('fTS','fTE');document.getElementById('fTE').value=c.timeEnd;
+  document.getElementById('fProg').value=c.program;
+  popCourses(c.program, c.courseName);
+  popInstr(c.program, c.courseName, c.instructor);
+  document.getElementById('fDay').value=c.day;
+  document.getElementById('fTS').value=c.timeStart;
+  syncEnd('fTS','fTE');
+  document.getElementById('fTE').value=c.timeEnd;
   document.getElementById('fSec').value=c.section||'';
   document.getElementById('addModal').classList.add('open');
 }
 function closeAddModal(){document.getElementById('addModal').classList.remove('open');editingId=null;}
 
 async function submitCourse(){
-  const instr=document.getElementById('fInstr').value.trim();
-  const cn=document.getElementById('fCourse').value.trim();
+  const instr=document.getElementById('fInstr').value;
+  const cn=document.getElementById('fCourse').value;
   const prog=document.getElementById('fProg').value,day=document.getElementById('fDay').value;
   const ts=document.getElementById('fTS').value,te=document.getElementById('fTE').value;
   const sec=document.getElementById('fSec').value.trim();
+  
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
   if(sBE(te)<sBS(ts)){showToast('Bitiş saati başlangıçtan önce olamaz.','error');return;}
   
-  const iN = instr.toLowerCase();
-  const cnN = cn.toLowerCase();
-  const otherCourses = courses.filter(c => c.program === prog && c.instructor.toLowerCase() === iN && c.id !== editingId && !isShared(c.courseName));
-
-  if (otherCourses.length > 0) {
-    const hasDifferentCourse = otherCourses.some(c => c.courseName.toLowerCase() !== cnN);
-    if (hasDifferentCourse) {
-      showToast('Aynı programa sadece 1 farklı ders ekleyebilirsiniz. Bölünmüş derslerin isimleri tamamen aynı olmalıdır.', 'error');
-      return;
-    }
-  }
-
   let savedCourse;
   if(editingId){
     const idx=courses.findIndex(c=>c.id===editingId);if(idx<0){closeAddModal();return;}
@@ -608,16 +669,65 @@ function showPublic(){['setupPage','adminLoginPage','adminPage'].forEach(id=>doc
 function showAdminLogin(){['setupPage','publicPage','adminPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('adminLoginPage').style.display='';document.getElementById('adminPwInput').value='';document.getElementById('loginError').style.display='none';}
 function doAdminLogin(){if(document.getElementById('adminPwInput').value===ADMIN_PW){isAdmin=true;showAdminPanel();}else document.getElementById('loginError').style.display='block';}
 function doAdminLogout(){isAdmin=false;showPublic();}
-function showAdminPanel(){['setupPage','publicPage','adminLoginPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('adminPage').style.display='';loadFromServer(false).then(renderAdminStats);}
+function showAdminPanel(){['setupPage','publicPage','adminLoginPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('adminPage').style.display='';loadFromServer(false).then(()=>{renderAdminStats(); popAdminCourses('ytto', null);});}
 
 function adminTab(tab,btn){
   document.querySelectorAll('.anav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  ['aStats','aLogs','aManage','aAdd','aSettings'].forEach(id=>document.getElementById(id).style.display='none');
-  const map={stats:'aStats',logs:'aLogs',manage:'aManage',add:'aAdd',settings:'aSettings'};
+  ['aStats','aLogs','aManage','aAdd','aSettings','aCatalog'].forEach(id=>document.getElementById(id).style.display='none');
+  const map={stats:'aStats',logs:'aLogs',manage:'aManage',add:'aAdd',settings:'aSettings',catalog:'aCatalog'};
   document.getElementById(map[tab]).style.display='';
   if(tab==='stats')renderAdminStats();if(tab==='logs')renderLogs();if(tab==='manage')renderAdminManage();
+  if(tab==='catalog')renderCatalog();
   if(tab==='settings')document.getElementById('settingsCode').textContent=`const GAS_URL = '${_url}';`;
 }
+
+// KATALOG YONETIMI ISLEMLERI
+function importCatalog() {
+  const text = document.getElementById('catInput').value;
+  const lines = text.split('\n');
+  let count = 0;
+  lines.forEach(l => {
+    const parts = l.split('\t');
+    if(parts.length >= 3) {
+      const p = parts[0].trim().toLowerCase();
+      if(PROG_KEYS.includes(p)) {
+        const cName = parts[1].trim();
+        const instr = parts[2].trim();
+        const exists = catalog.find(c => c.prog === p && c.cName === cName && c.instr === instr);
+        if(!exists) {
+          catalog.push({ prog: p, cName: cName, instr: instr });
+          count++;
+        }
+      }
+    }
+  });
+  document.getElementById('catInput').value = '';
+  renderCatalog();
+  apiPost({action: 'set_catalog', data: catalog}).catch(e=>console.warn(e));
+  showToast(count + ' yeni kayıt eklendi.', 'success');
+}
+
+function renderCatalog() {
+  const tb = document.getElementById('catBody');
+  if(!catalog.length) {
+    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;padding:10px">Katalog boş. Lütfen Excel üzerinden veri aktarın.</td></tr>';
+    return;
+  }
+  tb.innerHTML = catalog.map((c, i) => `<tr>
+    <td style="font-size:.75rem">${c.prog}</td>
+    <td>${esc(c.cName)}</td>
+    <td>${esc(c.instr)}</td>
+    <td><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem" onclick="delCat(${i})">Sil</button></td>
+  </tr>`).join('');
+}
+
+function delCat(i) {
+  catalog.splice(i, 1);
+  renderCatalog();
+  apiPost({action: 'set_catalog', data: catalog}).catch(e=>console.warn(e));
+  showToast('Kayıt silindi.', 'success');
+}
+
 function renderAdminStats(){
   const nc=courses.filter(c=>!c.id.startsWith('p')).length;
   document.getElementById('statsRow').innerHTML=`<div class="stat-card"><div class="sl">Yeni Ders</div><div class="sv">${nc}</div></div><div class="stat-card"><div class="sl">Toplam Ders</div><div class="sv">${courses.length}</div></div><div class="stat-card"><div class="sl">Öğretim Üyesi</div><div class="sv">${new Set(courses.map(c=>c.instructor)).size}</div></div><div class="stat-card"><div class="sl">İşlem Kaydı</div><div class="sv">${logs.length}</div></div>`;
@@ -637,7 +747,8 @@ function renderAdminManage(){
   tb.innerHTML=nc.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.instructor)}</td><td>${esc(c.courseName)}</td><td style="font-size:.71rem">${esc(PROGS[c.program]?.replace(/\n/g," ")||c.program)}</td><td>${esc(c.day)}</td><td>${esc(c.timeStart)} ${esc(c.timeEnd)}</td><td>${esc(c.section||'')}</td><td style="font-size:.71rem">${fmtDate(c.addedAt)}</td><td style="white-space:nowrap"><button class="btn" style="padding:3px 8px;font-size:.72rem;background:var(--alight);color:var(--accent);border:1px solid var(--accent)" onclick="openEditModal('${c.id}')">Düzenle</button><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem;margin-left:3px" onclick="openDelModal('${c.id}')">Sil</button></td></tr>`).join('');
 }
 async function adminAddCourse(){
-  const instr=document.getElementById('aInstr').value.trim(),cn=document.getElementById('aCourse').value.trim();
+  const instr=document.getElementById('aInstr').value;
+  const cn=document.getElementById('aCourse').value;
   const prog=document.getElementById('aProg').value,day=document.getElementById('aDay').value;
   const ts=document.getElementById('aTS').value,te=document.getElementById('aTE').value,sec=document.getElementById('aSec').value.trim();
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
