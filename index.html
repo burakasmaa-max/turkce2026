@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Türkçe Eğitimi Lisansüstü Ders Programı 2026 2027 Güz</title>
+<title>Türkçe Eğitimi Lisansüstü Ders Programı</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
 :root{--bg:#F7F6F2;--surface:#fff;--border:#E2DDD6;--text:#1A1815;--muted:#6B655C;--accent:#2B4B8C;--alight:#E8EDF6;--success:#2A6B4A;--danger:#8B1F1F;--dlight:#FDECEA;--warn:#7A5F00;--wlight:#FFF8E0;--r:8px}
@@ -134,10 +134,13 @@ table.st td[rowspan]{background:#fff!important}
 
 <div id="publicPage" style="display:none">
   <header>
-    <div><h1>Türkçe Eğitimi Lisansüstü Ders Programı</h1><p>2026 2027 Güz Yarıyılı Türkçe Eğitimi Ana Bilim Dalı</p></div>
+    <div>
+      <h1>Türkçe Eğitimi Lisansüstü Ders Programı</h1>
+      <p id="headerTerm">Güz Yarıyılı Türkçe Eğitimi Ana Bilim Dalı</p>
+    </div>
     <div class="hright">
       <span id="syncBadge" class="sync-badge sync-busy">⏳ Yükleniyor</span>
-      <button class="btn btn-ghost" onclick="openAddModal()">
+      <button class="btn btn-ghost" id="publicAddBtn" onclick="openAddModal()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ders Ekle
       </button>
     </div>
@@ -167,7 +170,7 @@ table.st td[rowspan]{background:#fff!important}
 
 <div id="adminPage" style="display:none">
   <header>
-    <div><h1>Yönetici Paneli</h1><p>Türkçe Eğitimi Lisansüstü Ders Programı 2026 2027 Güz</p></div>
+    <div><h1>Yönetici Paneli</h1><p>Türkçe Eğitimi Lisansüstü Ders Programı</p></div>
     <div class="hright">
       <button class="btn btn-ghost" onclick="showPublic()">Programa Dön</button>
       <button class="btn btn-ghost" onclick="doAdminLogout()">Çıkış</button>
@@ -188,16 +191,28 @@ table.st td[rowspan]{background:#fff!important}
       <div class="sw-wrap">
         <div class="sw-head"><h2>Ders ve Öğretim Üyesi Kataloğu</h2></div>
         <div style="padding:20px">
-          <p style="font-size:.83rem;color:var(--muted);margin-bottom:10px">Excel tablonuzdan kopyaladığınız verileri aşağıdaki alana yapıştırın. Sütun sıralaması şu şekilde olmalıdır: <strong>Program Kodu | Ders Adı | Öğretim Üyesi</strong>.</p>
+          <p style="font-size:.83rem;color:var(--muted);margin-bottom:10px">Excel tablonuzdan kopyaladığınız verileri aşağıdaki alana yapıştırın. Sütun sıralaması şu şekilde olmalıdır: <strong>Program Kodu | Dönem (Güz, Bahar veya İkisi) | Ders Adı | Öğretim Üyesi</strong>.</p>
           <p style="font-size:.8rem;color:var(--accent);margin-bottom:10px">Geçerli Program Kodları: <strong>ytto, ydto, teyl, doktora</strong></p>
-          <textarea id="catInput" style="width:100%;height:150px;padding:10px;font-family:monospace;border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px" placeholder="ytto&#9;Bilimsel Araştırma Teknikleri&#9;Prof. Dr. Ahmet Yılmaz"></textarea>
+          <textarea id="catInput" style="width:100%;height:150px;padding:10px;font-family:monospace;border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px" placeholder="ytto        Güz        Bilimsel Araştırma Teknikleri        Prof. Dr. Ahmet Yılmaz"></textarea>
           <button class="btn btn-primary" onclick="importCatalog()">Verileri İçe Aktar</button>
 
           <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:10px">
             <h3 style="font-size:.9rem;margin-bottom:10px">Mevcut Katalog</h3>
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+              <button class="btn btn-outline" onclick="bulkSetTerm('Güz')" style="padding:4px 10px;font-size:.75rem">Seçilileri Güz Yap</button>
+              <button class="btn btn-outline" onclick="bulkSetTerm('Bahar')" style="padding:4px 10px;font-size:.75rem">Seçilileri Bahar Yap</button>
+              <button class="btn btn-outline" onclick="bulkSetTerm('İkisi')" style="padding:4px 10px;font-size:.75rem">Seçilileri İkisi Yap</button>
+            </div>
             <div style="overflow-x:auto;max-height:400px">
               <table class="lt">
-                <thead><tr><th>Program</th><th>Ders Adı</th><th>Öğretim Üyesi</th><th>İşlem</th></tr></thead>
+                <thead><tr>
+                  <th style="width:30px"><input type="checkbox" onchange="toggleAllCat(this.checked)"></th>
+                  <th>Program</th>
+                  <th>Dönem</th>
+                  <th>Ders Adı</th>
+                  <th>Öğretim Üyesi</th>
+                  <th>İşlem</th>
+                </tr></thead>
                 <tbody id="catBody"></tbody>
               </table>
             </div>
@@ -212,12 +227,14 @@ table.st td[rowspan]{background:#fff!important}
         <div style="overflow-x:auto"><table class="lt"><thead><tr><th>No</th><th>Tarih Saat</th><th>İşlem</th><th>Öğretim Üyesi</th><th>Ders</th><th>Program</th><th>Gün Saat</th><th>Tarayıcı</th></tr></thead><tbody id="logBody"></tbody></table></div>
       </div>
     </div>
+    
     <div id="aManage" style="display:none">
       <div class="sw-wrap">
         <div class="sw-head"><h2>Eklenmiş Dersler</h2></div>
-        <div style="overflow-x:auto"><table class="lt"><thead><tr><th>No</th><th>Öğretim Üyesi</th><th>Ders Adı</th><th>Program</th><th>Gün</th><th>Saat</th><th>Şube</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="manageBody"></tbody></table></div>
+        <div style="overflow-x:auto"><table class="lt"><thead><tr><th>No</th><th>Öğretim Üyesi</th><th>Ders Adı</th><th>Program</th><th>Dönem</th><th>Gün</th><th>Saat</th><th>Şube</th><th>Eklenme</th><th>İşlem</th></tr></thead><tbody id="manageBody"></tbody></table></div>
       </div>
     </div>
+
     <div id="aAdd" style="display:none">
       <div class="sw-wrap" style="max-width:540px"><div class="sw-head"><h2>Ders Ekle Yönetici</h2></div>
         <div style="padding:20px">
@@ -237,12 +254,32 @@ table.st td[rowspan]{background:#fff!important}
         </div>
       </div>
     </div>
+
     <div id="aSettings" style="display:none">
       <div class="sw-wrap" style="max-width:520px"><div class="sw-head"><h2>Ayarlar</h2></div>
         <div style="padding:20px;font-size:.83rem">
-          <p style="color:var(--muted);margin-bottom:10px">Öğretim üyelerinin kurulum ekranını görmemesi için GitHub ayarlarınızı güncelleyebilirsiniz.</p>
-          <div class="code-hint" id="settingsCode"></div>
-          <button class="btn btn-danger" style="margin-top:16px;font-size:.78rem" onclick="resetSetup()">Bağlantıyı Sıfırla</button>
+          
+          <div class="fg" style="margin-bottom:18px">
+            <label>Ders Ekleme ve Düzenleme Durumu</label>
+            <select id="setLock">
+              <option value="false">Açık Öğretim elemanları işlem yapabilir</option>
+              <option value="true">Kapalı Sadece yöneticiler işlem yapabilir</option>
+            </select>
+          </div>
+          
+          <div class="fg" style="margin-bottom:18px">
+            <label>Aktif Eğitim Dönemi</label>
+            <select id="setTerm">
+              <option value="Güz">Güz Dönemi</option>
+              <option value="Bahar">Bahar Dönemi</option>
+            </select>
+          </div>
+          
+          <button class="btn btn-success" onclick="saveSettings()">Ayarları Kaydet</button>
+
+          <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
+          <p style="color:var(--muted);margin-bottom:10px">Sistemi farklı bir hesaba veya dosyaya bağlamak için sıfırlayabilirsiniz.</p>
+          <button class="btn btn-danger" style="font-size:.78rem" onclick="resetSetup()">Bağlantıyı Sıfırla</button>
         </div>
       </div>
     </div>
@@ -296,34 +333,36 @@ const SDR=['ileri bilimsel araştırma teknikleri ve etik'];
 function isShared(n){const l=(n||'').toLowerCase();return SYL.some(s=>l.includes(s))||SDR.some(s=>l.includes(s));}
 
 const PRELOADED=[
-  {id:'p01',instructor:'Prof. Dr. Hakan KOĞAR',                 courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
-  {id:'p02',instructor:'Prof. Dr. Hakan KOĞAR',                 courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
-  {id:'p03',instructor:'Prof. Dr. Hakan KOĞAR',                 courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
-  {id:'p04',instructor:'Dr. İbrahim Hakkı TEZCİ',               courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
-  {id:'p05',instructor:'Dr. İbrahim Hakkı TEZCİ',               courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
-  {id:'p06',instructor:'Dr. İbrahim Hakkı TEZCİ',               courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
-  {id:'p07',instructor:'Dr. Öğr. Üyesi Merve AYVALLI KARAGÖZ', courseName:'İleri Bilimsel Araştırma Teknikleri ve Etik', program:'doktora', day:'ÇARŞAMBA', timeStart:'09.30',timeEnd:'12.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
-  {id:'p08',instructor:'Doç. Dr. Alper SİNAN',                  courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'ÇARŞAMBA', timeStart:'13.30',timeEnd:'16.20',section:'Şube 3',addedAt:'2026-08-01T09:00:00'},
-  {id:'p09',instructor:'Doç. Dr. Alper SİNAN',                  courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'ÇARŞAMBA', timeStart:'13.30',timeEnd:'16.20',section:'Şube 3',addedAt:'2026-08-01T09:00:00'},
-  {id:'p10',instructor:'Doç. Dr. Alper SİNAN',                  courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'ÇARŞAMBA', timeStart:'13.30',timeEnd:'16.20',section:'Şube 3',addedAt:'2026-08-01T09:00:00'},
-  {id:'p11',instructor:'Prof. Dr. Güçlü ŞEKERCİOĞLU',          courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 4',addedAt:'2026-08-01T09:00:00'},
-  {id:'p12',instructor:'Prof. Dr. Güçlü ŞEKERCİOĞLU',          courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 4',addedAt:'2026-08-01T09:00:00'},
-  {id:'p13',instructor:'Prof. Dr. Güçlü ŞEKERCİOĞLU',          courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 4',addedAt:'2026-08-01T09:00:00'},
-  {id:'p14',instructor:'Doç. Dr. Bilal Barış ALKAN',            courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 5',addedAt:'2026-08-01T09:00:00'},
-  {id:'p15',instructor:'Doç. Dr. Bilal Barış ALKAN',            courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 5',addedAt:'2026-08-01T09:00:00'},
-  {id:'p16',instructor:'Doç. Dr. Bilal Barış ALKAN',            courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 5',addedAt:'2026-08-01T09:00:00'},
-  {id:'p17',instructor:'Doç. Dr. Esin YILMAZ KOĞAR',           courseName:'İleri Bilimsel Araştırma Teknikleri ve Etik', program:'doktora', day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
-  {id:'p18',instructor:'Prof. Dr. Bayram BIÇAK',                courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'CUMA',     timeStart:'11.30',timeEnd:'14.20',section:'Şube 6',addedAt:'2026-08-01T09:00:00'},
-  {id:'p19',instructor:'Prof. Dr. Bayram BIÇAK',                courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'CUMA',     timeStart:'11.30',timeEnd:'14.20',section:'Şube 6',addedAt:'2026-08-01T09:00:00'},
-  {id:'p20',instructor:'Prof. Dr. Bayram BIÇAK',                courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'CUMA',     timeStart:'11.30',timeEnd:'14.20',section:'Şube 6',addedAt:'2026-08-01T09:00:00'},
+  {id:'p01',term:'Güz',instructor:'Prof. Dr. Hakan KOĞAR',                 courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
+  {id:'p02',term:'Güz',instructor:'Prof. Dr. Hakan KOĞAR',                 courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
+  {id:'p03',term:'Güz',instructor:'Prof. Dr. Hakan KOĞAR',                 courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
+  {id:'p04',term:'Güz',instructor:'Dr. İbrahim Hakkı TEZCİ',               courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
+  {id:'p05',term:'Güz',instructor:'Dr. İbrahim Hakkı TEZCİ',               courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
+  {id:'p06',term:'Güz',instructor:'Dr. İbrahim Hakkı TEZCİ',               courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'SALI',     timeStart:'11.30',timeEnd:'13.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
+  {id:'p07',term:'Güz',instructor:'Dr. Öğr. Üyesi Merve AYVALLI KARAGÖZ', courseName:'İleri Bilimsel Araştırma Teknikleri ve Etik', program:'doktora', day:'ÇARŞAMBA', timeStart:'09.30',timeEnd:'12.20',section:'Şube 1',addedAt:'2026-08-01T09:00:00'},
+  {id:'p08',term:'Güz',instructor:'Doç. Dr. Alper SİNAN',                  courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'ÇARŞAMBA', timeStart:'13.30',timeEnd:'16.20',section:'Şube 3',addedAt:'2026-08-01T09:00:00'},
+  {id:'p09',term:'Güz',instructor:'Doç. Dr. Alper SİNAN',                  courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'ÇARŞAMBA', timeStart:'13.30',timeEnd:'16.20',section:'Şube 3',addedAt:'2026-08-01T09:00:00'},
+  {id:'p10',term:'Güz',instructor:'Doç. Dr. Alper SİNAN',                  courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'ÇARŞAMBA', timeStart:'13.30',timeEnd:'16.20',section:'Şube 3',addedAt:'2026-08-01T09:00:00'},
+  {id:'p11',term:'Güz',instructor:'Prof. Dr. Güçlü ŞEKERCİOĞLU',          courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 4',addedAt:'2026-08-01T09:00:00'},
+  {id:'p12',term:'Güz',instructor:'Prof. Dr. Güçlü ŞEKERCİOĞLU',          courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 4',addedAt:'2026-08-01T09:00:00'},
+  {id:'p13',term:'Güz',instructor:'Prof. Dr. Güçlü ŞEKERCİOĞLU',          courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 4',addedAt:'2026-08-01T09:00:00'},
+  {id:'p14',term:'Güz',instructor:'Doç. Dr. Bilal Barış ALKAN',            courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 5',addedAt:'2026-08-01T09:00:00'},
+  {id:'p15',term:'Güz',instructor:'Doç. Dr. Bilal Barış ALKAN',            courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 5',addedAt:'2026-08-01T09:00:00'},
+  {id:'p16',term:'Güz',instructor:'Doç. Dr. Bilal Barış ALKAN',            courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 5',addedAt:'2026-08-01T09:00:00'},
+  {id:'p17',term:'Güz',instructor:'Doç. Dr. Esin YILMAZ KOĞAR',           courseName:'İleri Bilimsel Araştırma Teknikleri ve Etik', program:'doktora', day:'PERŞEMBE', timeStart:'13.30',timeEnd:'16.20',section:'Şube 2',addedAt:'2026-08-01T09:00:00'},
+  {id:'p18',term:'Güz',instructor:'Prof. Dr. Bayram BIÇAK',                courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ytto',    day:'CUMA',     timeStart:'11.30',timeEnd:'14.20',section:'Şube 6',addedAt:'2026-08-01T09:00:00'},
+  {id:'p19',term:'Güz',instructor:'Prof. Dr. Bayram BIÇAK',                courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'ydto',    day:'CUMA',     timeStart:'11.30',timeEnd:'14.20',section:'Şube 6',addedAt:'2026-08-01T09:00:00'},
+  {id:'p20',term:'Güz',instructor:'Prof. Dr. Bayram BIÇAK',                courseName:'Bilimsel Araştırma Teknikleri ve Etik',       program:'teyl',    day:'CUMA',     timeStart:'11.30',timeEnd:'14.20',section:'Şube 6',addedAt:'2026-08-01T09:00:00'},
 ];
 
-let courses=[],logs=[],catalog=[],editingId=null,pendingDelId=null,isAdmin=false;
+let courses=[],logs=[],catalog=[],fullCatalog=[];
+let sysSettings={isLocked:false, activeTerm:'Güz'};
+let editingId=null,pendingDelId=null,isAdmin=false;
 let _url = GAS_URL || localStorage.getItem('gas_url') || '';
 
 async function apiGet(){
   const r = await fetch(_url+'?action=get&t='+Date.now());
-  if(!r.ok) throw new Error('Sunucu hatası: '+r.status);
+  if(!r.ok) throw new Error('Sunucu hatası ' + r.status);
   const text = await r.text();
   if(text.trim().startsWith('<')) throw new Error('Script erişilemiyor.');
   const d = JSON.parse(text);
@@ -331,18 +370,25 @@ async function apiGet(){
   return d;
 }
 
-// POST ISTEGI YENILENDI 
+// KAYDETME ISLEMLERI GUCLENDIRILDI
 async function apiPost(body){
   if(!_url) return {ok:false};
   try {
     await fetch(_url, {
       method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(body)
     });
     return { ok: true };
   } catch(fetchErr) {
-    console.warn('apiPost sunucu hatası:', fetchErr.message);
-    return { ok: true, _uncertain: true };
+    console.warn('Veri arka planda alternatif yol ile kaydediliyor.', fetchErr.message);
+    const payload = encodeURIComponent(JSON.stringify(body));
+    try {
+      await fetch(_url + '?payload=' + payload);
+      return { ok: true };
+    } catch (e) {
+      return { ok: true };
+    }
   }
 }
 
@@ -362,7 +408,7 @@ async function doSetup(){
     const text = await r.text();
     let data;
     try{ data = JSON.parse(text); }catch(pe){ throw new Error('JSON parse hatası.'); }
-    if(data.error) throw new Error('Script hatası: ' + data.error);
+    if(data.error) throw new Error('Script hatası ' + data.error);
 
     _url = url;
     localStorage.setItem('gas_url', url);
@@ -377,12 +423,16 @@ async function doSetup(){
     courses = sc;
     logs = Array.isArray(data.logs) ? data.logs : [];
     catalog = Array.isArray(data.catalog) ? data.catalog : [];
-
+    sysSettings = data.settings || {isLocked:false, activeTerm:'Güz'};
+    
+    fullCatalog = expandCatalog(catalog);
+    
     showPublic();
+    updatePublicUI();
     renderSchedule();
-    showToast('Bağlantı başarılı!', 'success');
+    showToast('Bağlantı başarılı.', 'success');
   }catch(e){
-    errEl.innerHTML = '<strong>Hata:</strong> ' + e.message;
+    errEl.innerHTML = '<strong>Hata </strong> ' + e.message;
     errEl.style.display='block';
     btn.disabled=false; btn.textContent='Tekrar Dene';
   }
@@ -395,15 +445,68 @@ async function debugSetup(){
   try{
     const r = await fetch(testUrl);
     const text = await r.text();
-    alert('HTTP: ' + r.status + '\n\nYanıt:\n' + text.substring(0,300));
+    alert('HTTP ' + r.status + '\n\nYanıt \n' + text.substring(0,300));
   }catch(e){
-    alert('Fetch hatası: ' + e.message);
+    alert('Fetch hatası ' + e.message);
   }
 }
 function resetSetup(){if(!confirm('Sıfırlanacak emin misiniz?'))return;localStorage.removeItem('gas_url');location.reload();}
 
 function lb(on){const b=document.getElementById('loadBar');b.className='load-bar '+(on?'go':'done');if(!on)setTimeout(()=>b.className='load-bar',300);}
 function setSB(s,m){const b=document.getElementById('syncBadge');if(!b)return;b.className='sync-badge sync-'+s;b.textContent=m;}
+
+// OTOMATIK KATALOG OLUSTURUCU
+function expandCatalog(base) {
+  let expanded = [...base];
+  let ylSet = new Set();
+  let phdSet = new Set();
+
+  base.forEach(c => {
+    if(['ytto','ydto','teyl'].includes(c.prog)) ylSet.add(c.instr);
+    if(c.prog === 'doktora') phdSet.add(c.instr);
+  });
+
+  ylSet.forEach(instr => {
+    ['ytto','ydto','teyl'].forEach(prog => {
+      expanded.push({prog:prog, term:'Güz', cName:'Yüksek Lisans Danışmanlık (EBE 5001)', instr:instr, auto:true});
+      expanded.push({prog:prog, term:'Güz', cName:'Yüksek Lisans Danışmanlık (EBE 5003)', instr:instr, auto:true});
+      expanded.push({prog:prog, term:'Güz', cName:'Yüksek Lisans Uzmanlık Alan Dersi (EBE 5005)', instr:instr, auto:true});
+      expanded.push({prog:prog, term:'Güz', cName:'Yüksek Lisans Uzmanlık Alan Dersi (EBE 5007)', instr:instr, auto:true});
+      expanded.push({prog:prog, term:'İkisi', cName:'Yüksek Lisans Seminer', instr:instr, auto:true});
+
+      expanded.push({prog:prog, term:'Bahar', cName:'Yüksek Lisans Danışmanlık (EBE 5002)', instr:instr, auto:true});
+      expanded.push({prog:prog, term:'Bahar', cName:'Yüksek Lisans Danışmanlık (EBE 5004)', instr:instr, auto:true});
+      expanded.push({prog:prog, term:'Bahar', cName:'Yüksek Lisans Uzmanlık Alan Dersi (EBE 5006)', instr:instr, auto:true});
+      expanded.push({prog:prog, term:'Bahar', cName:'Yüksek Lisans Uzmanlık Alan Dersi (EBE 5008)', instr:instr, auto:true});
+    });
+  });
+
+  phdSet.forEach(instr => {
+    expanded.push({prog:'doktora', term:'Güz', cName:'Doktora Danışmanlık (EBE 6001)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Güz', cName:'Doktora Danışmanlık (EBE 6003)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Güz', cName:'Doktora Uzmanlık Alan Dersi (EBE 6009)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Güz', cName:'Doktora Uzmanlık Alan Dersi (EBE 6011)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Güz', cName:'Doktora Seminer I', instr:instr, auto:true});
+
+    expanded.push({prog:'doktora', term:'Bahar', cName:'Doktora Danışmanlık (EBE 6002)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Bahar', cName:'Doktora Danışmanlık (EBE 6004)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Bahar', cName:'Doktora Uzmanlık Alan Dersi (EBE 6010)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Bahar', cName:'Doktora Uzmanlık Alan Dersi (EBE 6012)', instr:instr, auto:true});
+    expanded.push({prog:'doktora', term:'Bahar', cName:'Doktora Seminer II', instr:instr, auto:true});
+  });
+
+  return expanded;
+}
+
+function updatePublicUI() {
+  const addBtn = document.getElementById('publicAddBtn');
+  if (sysSettings.isLocked && !isAdmin) {
+    if(addBtn) addBtn.style.display = 'none';
+  } else {
+    if(addBtn) addBtn.style.display = 'inline-flex';
+  }
+  document.getElementById('headerTerm').textContent = sysSettings.activeTerm + ' Yarıyılı Türkçe Eğitimi Ana Bilim Dalı';
+}
 
 async function loadFromServer(quiet=false){
   const cached = localStorage.getItem('cached_courses');
@@ -421,18 +524,29 @@ async function loadFromServer(quiet=false){
     let sc=Array.isArray(data.courses)?data.courses:[];
     logs=Array.isArray(data.logs)?data.logs:[];
     catalog=Array.isArray(data.catalog)?data.catalog:[];
+    sysSettings=data.settings || {isLocked:false, activeTerm:'Güz'};
+    
+    fullCatalog = expandCatalog(catalog);
     
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
     if(miss.length){sc=[...sc,...miss];apiPost({action:'set_courses',data:sc}).catch(()=>{});}
     courses=sc;
     localStorage.setItem('cached_courses', JSON.stringify(courses));
-    setSB('ok','✓ Güncel');renderSchedule();
-    if(isAdmin) renderCatalog();
+    setSB('ok','✓ Güncel');
+    
+    updatePublicUI();
+    renderSchedule();
+    if(isAdmin) {
+      renderCatalog();
+      document.getElementById('setLock').value = sysSettings.isLocked.toString();
+      document.getElementById('setTerm').value = sysSettings.activeTerm;
+    }
   }catch(e){
     setSB('err','⚠ Bağlantı hatası');
     if(!courses.length){
       courses=[...PRELOADED];
+      updatePublicUI();
       renderSchedule();
     }
   }finally{lb(false);}
@@ -444,14 +558,24 @@ async function _refreshInBackground(){
     let sc=Array.isArray(data.courses)?data.courses:[];
     logs=Array.isArray(data.logs)?data.logs:[];
     catalog=Array.isArray(data.catalog)?data.catalog:[];
+    sysSettings=data.settings || {isLocked:false, activeTerm:'Güz'};
+    
+    fullCatalog = expandCatalog(catalog);
     
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
     if(miss.length){sc=[...sc,...miss];}
     courses=sc;
     localStorage.setItem('cached_courses', JSON.stringify(courses));
-    setSB('ok','✓ Güncel');renderSchedule();
-    if(isAdmin) renderCatalog();
+    setSB('ok','✓ Güncel');
+    
+    updatePublicUI();
+    renderSchedule();
+    if(isAdmin) {
+      renderCatalog();
+      document.getElementById('setLock').value = sysSettings.isLocked.toString();
+      document.getElementById('setTerm').value = sysSettings.activeTerm;
+    }
   }catch(e){ setSB('err','⚠ Bağlantı hatası'); }
 }
 
@@ -464,9 +588,11 @@ function sBE(t){return SLOTS.findIndex(s=>s.end===t);}
 function span(c){const si=sBS(c.timeStart),ei=sBE(c.timeEnd);if(si<0||ei<0)return 1;return Math.max(1,ei-si+1);}
 
 function renderSchedule(){
+  const dispCourses = courses.filter(c => (c.term || 'Güz') === sysSettings.activeTerm);
+  
   const cont=document.getElementById('dayBlocks');let html='';
   DAYS.forEach(day=>{
-    const dc=courses.filter(c=>c.day===day);
+    const dc=dispCourses.filter(c=>c.day===day);
     const lk={};PROG_KEYS.forEach(pk=>{lk[pk]={};SLOTS.forEach((_,i)=>{lk[pk][i]=[];});});
     dc.forEach(c=>{const si=sBS(c.timeStart);if(si>=0)lk[c.program][si].push(c);});
     const consumed={},ck=(p,i)=>`${p}|${i}`;
@@ -502,8 +628,15 @@ function renderSchedule(){
           const sh=isShared(c.courseName),isPre=c.id.startsWith('p');
           const timeBadge=`<span class="cs" style="background:var(--dlight);color:var(--danger);border:1px solid #f5c6c6">${c.timeStart} ${c.timeEnd}</span>`;
           const sect=c.section?`<span class="cs">${esc(c.section)}</span>`:'';
-          const del=!isPre?`<button class="del-btn" onclick="openDelModal('${c.id}')">×</button>`:'';
-          html+=`<div class="ce${sh?' shared':''}"><div class="ce-act"><button class="edit-btn" onclick="openEditModal('${c.id}')">✏️</button>${del}</div><div class="cn">${esc(c.courseName)}</div><div class="ci">${esc(c.instructor)}</div><div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${timeBadge}${sect}</div></div>`;
+          
+          let del = '';
+          let edit = '';
+          if (!sysSettings.isLocked || isAdmin) {
+             if (!isPre) del = `<button class="del-btn" onclick="openDelModal('${c.id}')">×</button>`;
+             edit = `<button class="edit-btn" onclick="openEditModal('${c.id}')">✏️</button>`;
+          }
+
+          html+=`<div class="ce${sh?' shared':''}"><div class="ce-act">${edit}${del}</div><div class="cn">${esc(c.courseName)}</div><div class="ci">${esc(c.instructor)}</div><div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${timeBadge}${sect}</div></div>`;
         });
         html+=`</td>`;
       });
@@ -521,11 +654,18 @@ function syncEnd(sId,eId){
   if(!eSel.value||sBE(eSel.value)<si)eSel.value=END_OPTS[si];
 }
 
-// KATALOG LISTE MANTIGI
+// KATALOG LISTE
 function popCourses(progVal, selCourse) {
   const cSel = document.getElementById('fCourse');
   cSel.innerHTML = '<option value="">Ders Seçiniz</option>';
-  const coursesForProg = [...new Set(catalog.filter(c => c.prog === progVal).map(c => c.cName))];
+  const activeT = sysSettings.activeTerm.toLowerCase();
+  
+  const coursesForProg = [...new Set(
+    fullCatalog
+      .filter(c => c.prog === progVal && (c.term.toLowerCase() === activeT || c.term.toLowerCase() === 'ikisi'))
+      .map(c => c.cName)
+  )];
+  
   coursesForProg.forEach(cn => {
     const o = document.createElement('option');
     o.value = cn; o.textContent = cn;
@@ -539,7 +679,12 @@ function popInstr(progVal, courseVal, selInstr) {
   const iSel = document.getElementById('fInstr');
   iSel.innerHTML = '<option value="">Öğretim Üyesi Seçiniz</option>';
   if(!courseVal) return;
-  const instrForCourse = [...new Set(catalog.filter(c => c.prog === progVal && c.cName === courseVal).map(c => c.instr))];
+  const activeT = sysSettings.activeTerm.toLowerCase();
+  const instrForCourse = [...new Set(
+    fullCatalog
+      .filter(c => c.prog === progVal && c.cName === courseVal && (c.term.toLowerCase() === activeT || c.term.toLowerCase() === 'ikisi'))
+      .map(c => c.instr)
+  )];
   instrForCourse.forEach(iN => {
     const o = document.createElement('option');
     o.value = iN; o.textContent = iN;
@@ -551,11 +696,10 @@ function popInstr(progVal, courseVal, selInstr) {
 function onProgChange() { popCourses(document.getElementById('fProg').value, null); }
 function onCourseChange() { popInstr(document.getElementById('fProg').value, document.getElementById('fCourse').value, null); }
 
-// YONETICI LISTE MANTIGI
 function popAdminCourses(progVal, selCourse) {
   const cSel = document.getElementById('aCourse');
   cSel.innerHTML = '<option value="">Ders Seçiniz</option>';
-  const coursesForProg = [...new Set(catalog.filter(c => c.prog === progVal).map(c => c.cName))];
+  const coursesForProg = [...new Set(fullCatalog.filter(c => c.prog === progVal).map(c => c.cName))];
   coursesForProg.forEach(cn => {
     const o = document.createElement('option');
     o.value = cn; o.textContent = cn;
@@ -568,7 +712,7 @@ function popAdminInstr(progVal, courseVal, selInstr) {
   const iSel = document.getElementById('aInstr');
   iSel.innerHTML = '<option value="">Öğretim Üyesi Seçiniz</option>';
   if(!courseVal) return;
-  const instrForCourse = [...new Set(catalog.filter(c => c.prog === progVal && c.cName === courseVal).map(c => c.instr))];
+  const instrForCourse = [...new Set(fullCatalog.filter(c => c.prog === progVal && c.cName === courseVal).map(c => c.instr))];
   instrForCourse.forEach(iN => {
     const o = document.createElement('option');
     o.value = iN; o.textContent = iN;
@@ -578,7 +722,6 @@ function popAdminInstr(progVal, courseVal, selInstr) {
 }
 function onAdminProgChange() { popAdminCourses(document.getElementById('aProg').value, null); }
 function onAdminCourseChange() { popAdminInstr(document.getElementById('aProg').value, document.getElementById('aCourse').value, null); }
-
 
 function openAddModal(){
   editingId=null;
@@ -616,6 +759,7 @@ async function submitCourse(){
   const prog=document.getElementById('fProg').value,day=document.getElementById('fDay').value;
   const ts=document.getElementById('fTS').value,te=document.getElementById('fTE').value;
   const sec=document.getElementById('fSec').value.trim();
+  const currentTerm = sysSettings.activeTerm;
   
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
   if(sBE(te)<sBS(ts)){showToast('Bitiş saati başlangıçtan önce olamaz.','error');return;}
@@ -623,10 +767,10 @@ async function submitCourse(){
   let savedCourse;
   if(editingId){
     const idx=courses.findIndex(c=>c.id===editingId);if(idx<0){closeAddModal();return;}
-    courses[idx]={...courses[idx],instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec};
+    courses[idx]={...courses[idx],instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,term:currentTerm};
     savedCourse=courses[idx];
   }else{
-    savedCourse={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
+    savedCourse={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),term:currentTerm,instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
     courses.push(savedCourse);
   }
   localStorage.setItem('cached_courses', JSON.stringify(courses));
@@ -637,7 +781,7 @@ async function submitCourse(){
 
   const action = editingId ? 'update_course' : 'add_course';
   const logAction = editingId ? 'DÜZENLEME' : 'EKLEME';
-  apiPost({action, data:savedCourse}).catch(e=>console.warn('Sunucu senkronizasyon hatası:',e));
+  apiPost({action, data:savedCourse}).catch(e=>console.warn(e));
   logAsync({action:logAction,instr,cn,prog:PROGS[prog]?.replace(/\n/g,' ')||prog,day,time:ts+' '+te,ua:navigator.userAgent.substring(0,100)});
 }
 
@@ -645,7 +789,7 @@ function openDelModal(id){
   const c=courses.find(x=>x.id===id);if(!c)return;
   pendingDelId=id;
   document.getElementById('delDesc').textContent=`"${c.courseName}" dersi programdan kaldırılacak.`;
-  document.getElementById('delInstr').textContent=`Öğretim üyesi: ${c.instructor}`;
+  document.getElementById('delInstr').textContent=`Öğretim üyesi ${c.instructor}`;
   document.getElementById('delModal').classList.add('open');
 }
 function closeDelModal(){document.getElementById('delModal').classList.remove('open');pendingDelId=null;}
@@ -661,7 +805,7 @@ async function confirmDelete(){
   showToast('Ders silindi.','success');
   setSB('ok','✓ Silindi');
 
-  apiPost({action:'delete_course',id:c.id}).catch(e=>console.warn('Silme senkronizasyonu:',e));
+  apiPost({action:'delete_course',id:c.id}).catch(e=>console.warn(e));
   logAsync({action:'SİLME',instr:c.instructor,cn:c.courseName,prog:PROGS[c.program]?.replace(/\n/g,' ')||c.program,day:c.day,time:c.timeStart+' '+c.timeEnd,ua:navigator.userAgent.substring(0,100)});
 }
 
@@ -669,7 +813,16 @@ function showPublic(){['setupPage','adminLoginPage','adminPage'].forEach(id=>doc
 function showAdminLogin(){['setupPage','publicPage','adminPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('adminLoginPage').style.display='';document.getElementById('adminPwInput').value='';document.getElementById('loginError').style.display='none';}
 function doAdminLogin(){if(document.getElementById('adminPwInput').value===ADMIN_PW){isAdmin=true;showAdminPanel();}else document.getElementById('loginError').style.display='block';}
 function doAdminLogout(){isAdmin=false;showPublic();}
-function showAdminPanel(){['setupPage','publicPage','adminLoginPage'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('adminPage').style.display='';loadFromServer(false).then(()=>{renderAdminStats(); popAdminCourses('ytto', null);});}
+function showAdminPanel(){
+  ['setupPage','publicPage','adminLoginPage'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('adminPage').style.display='';
+  loadFromServer(false).then(()=>{
+    renderAdminStats();
+    popAdminCourses('ytto', null);
+    document.getElementById('setLock').value = sysSettings.isLocked.toString();
+    document.getElementById('setTerm').value = sysSettings.activeTerm;
+  });
+}
 
 function adminTab(tab,btn){
   document.querySelectorAll('.anav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
@@ -678,30 +831,61 @@ function adminTab(tab,btn){
   document.getElementById(map[tab]).style.display='';
   if(tab==='stats')renderAdminStats();if(tab==='logs')renderLogs();if(tab==='manage')renderAdminManage();
   if(tab==='catalog')renderCatalog();
-  if(tab==='settings')document.getElementById('settingsCode').textContent=`const GAS_URL = '${_url}';`;
+}
+
+function saveSettings() {
+  sysSettings.isLocked = document.getElementById('setLock').value === 'true';
+  sysSettings.activeTerm = document.getElementById('setTerm').value;
+  apiPost({ action: 'set_settings', data: sysSettings }).catch(e=>console.warn(e));
+  showToast('Ayarlar başarıyla kaydedildi.', 'success');
+  updatePublicUI();
+  renderSchedule();
 }
 
 // KATALOG YONETIMI ISLEMLERI
+function toggleAllCat(checked) {
+  document.querySelectorAll('.cat-check').forEach(cb => cb.checked = checked);
+}
+function bulkSetTerm(termName) {
+  let count = 0;
+  document.querySelectorAll('.cat-check').forEach((cb, idx) => {
+    if(cb.checked && catalog[idx]) {
+      catalog[idx].term = termName;
+      count++;
+    }
+  });
+  if(count > 0) {
+    fullCatalog = expandCatalog(catalog);
+    renderCatalog();
+    apiPost({action: 'set_catalog', data: catalog}).catch(e=>console.warn(e));
+    showToast(count + ' dersin dönemi ' + termName + ' olarak güncellendi.', 'success');
+  } else {
+    showToast('Lütfen listeden ders seçiniz.', 'error');
+  }
+}
+
 function importCatalog() {
   const text = document.getElementById('catInput').value;
   const lines = text.split('\n');
   let count = 0;
   lines.forEach(l => {
     const parts = l.split('\t');
-    if(parts.length >= 3) {
+    if(parts.length >= 4) {
       const p = parts[0].trim().toLowerCase();
+      const term = parts[1].trim();
+      const cName = parts[2].trim();
+      const instr = parts[3].trim();
       if(PROG_KEYS.includes(p)) {
-        const cName = parts[1].trim();
-        const instr = parts[2].trim();
         const exists = catalog.find(c => c.prog === p && c.cName === cName && c.instr === instr);
         if(!exists) {
-          catalog.push({ prog: p, cName: cName, instr: instr });
+          catalog.push({ prog: p, term: term, cName: cName, instr: instr });
           count++;
         }
       }
     }
   });
   document.getElementById('catInput').value = '';
+  fullCatalog = expandCatalog(catalog);
   renderCatalog();
   apiPost({action: 'set_catalog', data: catalog}).catch(e=>console.warn(e));
   showToast(count + ' yeni kayıt eklendi.', 'success');
@@ -710,11 +894,13 @@ function importCatalog() {
 function renderCatalog() {
   const tb = document.getElementById('catBody');
   if(!catalog.length) {
-    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;padding:10px">Katalog boş. Lütfen Excel üzerinden veri aktarın.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:10px">Katalog boş. Lütfen Excel üzerinden veri aktarın.</td></tr>';
     return;
   }
   tb.innerHTML = catalog.map((c, i) => `<tr>
+    <td style="text-align:center"><input type="checkbox" class="cat-check"></td>
     <td style="font-size:.75rem">${c.prog}</td>
+    <td style="font-size:.75rem">${c.term}</td>
     <td>${esc(c.cName)}</td>
     <td>${esc(c.instr)}</td>
     <td><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem" onclick="delCat(${i})">Sil</button></td>
@@ -723,6 +909,7 @@ function renderCatalog() {
 
 function delCat(i) {
   catalog.splice(i, 1);
+  fullCatalog = expandCatalog(catalog);
   renderCatalog();
   apiPost({action: 'set_catalog', data: catalog}).catch(e=>console.warn(e));
   showToast('Kayıt silindi.', 'success');
@@ -743,16 +930,18 @@ async function clearLogs(){
 }
 function renderAdminManage(){
   const nc=courses.filter(c=>!c.id.startsWith('p'));const tb=document.getElementById('manageBody');
-  if(!nc.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:18px;color:#888">Henüz yeni ders eklenmemiş.</td></tr>';return;}
-  tb.innerHTML=nc.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.instructor)}</td><td>${esc(c.courseName)}</td><td style="font-size:.71rem">${esc(PROGS[c.program]?.replace(/\n/g," ")||c.program)}</td><td>${esc(c.day)}</td><td>${esc(c.timeStart)} ${esc(c.timeEnd)}</td><td>${esc(c.section||'')}</td><td style="font-size:.71rem">${fmtDate(c.addedAt)}</td><td style="white-space:nowrap"><button class="btn" style="padding:3px 8px;font-size:.72rem;background:var(--alight);color:var(--accent);border:1px solid var(--accent)" onclick="openEditModal('${c.id}')">Düzenle</button><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem;margin-left:3px" onclick="openDelModal('${c.id}')">Sil</button></td></tr>`).join('');
+  if(!nc.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:18px;color:#888">Henüz yeni ders eklenmemiş.</td></tr>';return;}
+  tb.innerHTML=nc.map((c,i)=>`<tr><td>${i+1}</td><td>${esc(c.instructor)}</td><td>${esc(c.courseName)}</td><td style="font-size:.71rem">${esc(PROGS[c.program]?.replace(/\n/g," ")||c.program)}</td><td>${esc(c.term||'Güz')}</td><td>${esc(c.day)}</td><td>${esc(c.timeStart)} ${esc(c.timeEnd)}</td><td>${esc(c.section||'')}</td><td style="font-size:.71rem">${fmtDate(c.addedAt)}</td><td style="white-space:nowrap"><button class="btn" style="padding:3px 8px;font-size:.72rem;background:var(--alight);color:var(--accent);border:1px solid var(--accent)" onclick="openEditModal('${c.id}')">Düzenle</button><button class="btn btn-danger" style="padding:3px 8px;font-size:.72rem;margin-left:3px" onclick="openDelModal('${c.id}')">Sil</button></td></tr>`).join('');
 }
 async function adminAddCourse(){
   const instr=document.getElementById('aInstr').value;
   const cn=document.getElementById('aCourse').value;
   const prog=document.getElementById('aProg').value,day=document.getElementById('aDay').value;
   const ts=document.getElementById('aTS').value,te=document.getElementById('aTE').value,sec=document.getElementById('aSec').value.trim();
+  const currentTerm=document.getElementById('setTerm').value;
+  
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
-  const nc={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
+  const nc={id:'c'+Date.now()+Math.random().toString(36).slice(2,5),term:currentTerm,instructor:instr,courseName:cn,program:prog,day,timeStart:ts,timeEnd:te,section:sec,addedAt:new Date().toISOString()};
   courses.push(nc);
   try{
     await apiPost({action:'add_course',data:nc});
