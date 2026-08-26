@@ -44,7 +44,10 @@ header p{font-size:.75rem;opacity:.7;margin-top:2px;font-weight:300}
 .day-title{background:#1e3870;color:#fff;padding:8px 16px;font-size:.87rem;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
 .day-title span{opacity:.55;font-size:.73rem;font-weight:400}
 .sched-scroll{overflow-x:auto}
-table.st{width:100%;border-collapse:collapse;font-size:.78rem;table-layout:fixed}
+
+/* MOBIL TABLO DUZELTMESI */
+table.st{width:100%;min-width:960px;border-collapse:collapse;font-size:.78rem;table-layout:fixed}
+
 table.st th{background:var(--accent);color:#fff;font-weight:600;padding:8px 10px;text-align:center;font-size:.73rem;letter-spacing:.02em;white-space:nowrap}
 table.st th.time-th{width:90px;text-align:left;padding-left:10px}
 table.st th.prog-th{min-width:210px}
@@ -66,7 +69,7 @@ table.st td[rowspan]{background:#fff!important}
 .sync-ok{background:#D4EDDA;color:#1A5C2E}.sync-err{background:var(--dlight);color:var(--danger)}.sync-busy{background:#E0EAFF;color:var(--accent)}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
 .overlay.open{display:flex}
-.modal{background:#fff;border-radius:12px;padding:26px;width:min(520px,96vw);box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:92vh;overflow-y:auto}
+.modal{background:#fff;border-radius:12px;padding:26px;width:min(520px,95vw);box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:92vh;overflow-y:auto}
 .modal h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--accent);font-family:'Playfair Display',serif}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mact{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
@@ -113,8 +116,8 @@ table.st td[rowspan]{background:#fff!important}
     <div class="setup-box">
       <h2>İlk Kurulum</h2>
       <p class="setup-sub">Google Sheet veritabanı kurulumunu yalnızca bir kez yapmanız yeterlidir.</p>
-      <div class="step"><div class="step-num">1</div><div class="step-body"><a href="https://sheets.google.com" target="_blank">sheets.google.com</a>'da yeni boş bir sayfa açın.</div></div>
-      <div class="step"><div class="step-num">2</div><div class="step-body">Uzantılar bölümünden Apps Script'e tıklayın. Kodu yapıştırıp kaydedin.</div></div>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><a href="https://sheets.google.com" target="_blank">sheets.google.com</a> adresinde yeni boş bir sayfa açın.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body">Uzantılar bölümünden Apps Script alanına tıklayın. Kodu yapıştırıp kaydedin.</div></div>
       <div class="step"><div class="step-num">3</div><div class="step-body">Dağıt ve Yeni dağıtım tıklayın.<br>
         Tür: <code>Web uygulaması</code> Kim olarak: <code>Ben</code> Erişim: <code>Herkes</code><br>
         URL adresini kopyalayın.</div></div>
@@ -258,7 +261,7 @@ table.st td[rowspan]{background:#fff!important}
 
 <script>
 // GAS URL ayarı
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbywm5LhqHiaP5MSOu8xkJXJpjSHRNgxpFjPZyQ8ZPKXnb77wrdt-1zV0p1MQbs2398l/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzT75OxxZZ-krhNJ3wxQRp_hY3d4rFB6iY92BZbOeOrZl0KZNLaAaiml_9MBRhzajvQ/exec';
 
 const ADMIN_PW='turkce2026';
 const PROGS={ytto:'Yurtdışındaki Türk Çocuklarına\nTürkçe Öğretimi',ydto:'Yabancı Dil Olarak\nTürkçe Öğretimi',teyl:'Türkçe Eğitimi\nTezli Yüksek Lisans',doktora:'Türkçe Eğitimi\nDoktora'};
@@ -305,32 +308,21 @@ async function apiGet(){
   if(d.error) throw new Error(d.error);
   return d;
 }
+
+// KAYDETME ALTYAPISI GUCLENDIRILDI
 async function apiPost(body){
-  const json = JSON.stringify(body);
-  const payload = encodeURIComponent(json);
-  if(payload.length > 1800) {
-    console.warn('Payload boyutu büyük atlandı', body.action);
-    return {ok:true, _skipped:true};
-  }
-  const url = _url + '?payload=' + payload + '&t=' + Date.now();
+  if(!_url) return {ok:false};
   try {
-    const r = await fetch(url);
-    if(r.status === 404) {
-      console.warn('404 alındı işlem atlandı:', body.action);
-      return {ok:true, _404:true};
-    }
-    const text = await r.text();
-    if(text.trim().startsWith('<')) return {ok:true};
-    try {
-      const d = JSON.parse(text);
-      if(d.error) throw new Error(d.error);
-      return d;
-    } catch(pe) {
-      return {ok:true}; 
-    }
+    await fetch(_url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(body)
+    });
+    return { ok: true };
   } catch(fetchErr) {
-    console.warn('apiPost fetch hatası:', fetchErr.message);
-    return {ok:true, _uncertain:true};
+    console.warn('apiPost sunucu hatası:', fetchErr.message);
+    return { ok: true, _uncertain: true };
   }
 }
 
@@ -338,10 +330,8 @@ async function doSetup(){
   const inp  = document.getElementById('gasUrl');
   const errEl= document.getElementById('setupErr');
   const btn  = document.getElementById('setupBtn');
-
   errEl.style.display='none';
   const url = inp.value.trim();
-
   if(!url){
     errEl.textContent='Lütfen URL girin.';
     errEl.style.display='block';
@@ -352,7 +342,6 @@ async function doSetup(){
     errEl.style.display='block';
     return;
   }
-
   btn.disabled=true;
   btn.textContent='Bağlanıyor…';
   errEl.style.display='none';
@@ -360,27 +349,13 @@ async function doSetup(){
   try{
     const testUrl = url + (url.includes('?') ? '&' : '?') + 'action=get&t=' + Date.now();
     const r = await fetch(testUrl);
-
-    if(!r.ok){
-      throw new Error('Sunucu HTTP ' + r.status + ' döndürdü.');
-    }
-
+    if(!r.ok) throw new Error('Sunucu HTTP ' + r.status + ' döndürdü.');
     const text = await r.text();
-
-    if(!text || text.trim()===''){
-      throw new Error('Sunucu boş yanıt döndürdü.');
-    }
-    if(text.trim().startsWith('<')){
-      throw new Error('Script HTML sayfası döndürdü.');
-    }
+    if(!text || text.trim()==='') throw new Error('Sunucu boş yanıt döndürdü.');
+    if(text.trim().startsWith('<')) throw new Error('Script HTML sayfası döndürdü.');
 
     let data;
-    try{
-      data = JSON.parse(text);
-    }catch(pe){
-      throw new Error('JSON parse hatası.');
-    }
-
+    try{ data = JSON.parse(text); }catch(pe){ throw new Error('JSON parse hatası.'); }
     if(data.error) throw new Error('Script hatası: ' + data.error);
 
     _url = url;
@@ -390,7 +365,7 @@ async function doSetup(){
     const ids = new Set(sc.map(c=>c.id));
     const missing = PRELOADED.filter(p=>!ids.has(p.id));
     for(const p of missing){
-      fetch(url, {method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add_course',data:p})}).catch(()=>{});
+      apiPost({action:'add_course',data:p});
       sc.push(p);
     }
     courses = sc;
@@ -399,10 +374,8 @@ async function doSetup(){
     showPublic();
     renderSchedule();
     showToast('Bağlantı başarılı!', 'success');
-
   }catch(e){
-    const msg = e.message || String(e);
-    errEl.innerHTML = '<strong>Hata:</strong> ' + msg;
+    errEl.innerHTML = '<strong>Hata:</strong> ' + e.message;
     errEl.style.display='block';
     btn.disabled=false;
     btn.textContent='Tekrar Dene';
@@ -484,6 +457,7 @@ function sBS(t){return SLOTS.findIndex(s=>s.start===t);}
 function sBE(t){return SLOTS.findIndex(s=>s.end===t);}
 function span(c){const si=sBS(c.timeStart),ei=sBE(c.timeEnd);if(si<0||ei<0)return 1;return Math.max(1,ei-si+1);}
 
+// ÇAKIŞAN DERSLERI BIRLESTIRME MANTIGI
 function renderSchedule(){
   const cont=document.getElementById('dayBlocks');let html='';
   DAYS.forEach(day=>{
@@ -499,15 +473,32 @@ function renderSchedule(){
       html+=`<tr><td class="time-cell">${slot.label}</td>`;
       PROG_KEYS.forEach(pk=>{
         if(consumed[ck(pk,si)])return;
-        const cells=lk[pk][si];let ms=1;cells.forEach(c=>{ms=Math.max(ms,span(c));});
-        for(let r=1;r<ms;r++)consumed[ck(pk,si+r)]=true;
+        
+        let cells=[...lk[pk][si]];
+        let ms=1;
+        
+        if(cells.length > 0) {
+          let endSlot = si;
+          cells.forEach(c => { endSlot = Math.max(endSlot, si + span(c) - 1); });
+          let curr = si + 1;
+          while (curr <= endSlot && curr < SLOTS.length) {
+            const nextCells = lk[pk][curr];
+            cells.push(...nextCells);
+            nextCells.forEach(c => { endSlot = Math.max(endSlot, curr + span(c) - 1); });
+            consumed[ck(pk, curr)] = true;
+            curr++;
+          }
+          ms = endSlot - si + 1;
+        }
+
         const rs=ms>1?` rowspan="${ms}"`:'';
         html+=`<td${rs} style="vertical-align:top">`;
         cells.forEach(c=>{
           const sh=isShared(c.courseName),isPre=c.id.startsWith('p');
+          const timeBadge=`<span class="cs" style="background:var(--dlight);color:var(--danger);border:1px solid #f5c6c6">${c.timeStart} ${c.timeEnd}</span>`;
           const sect=c.section?`<span class="cs">${esc(c.section)}</span>`:'';
           const del=!isPre?`<button class="del-btn" onclick="openDelModal('${c.id}')">×</button>`:'';
-          html+=`<div class="ce${sh?' shared':''}"><div class="ce-act"><button class="edit-btn" onclick="openEditModal('${c.id}')">✏️</button>${del}</div><div class="cn">${esc(c.courseName)}</div><div class="ci">${esc(c.instructor)}</div>${sect}</div>`;
+          html+=`<div class="ce${sh?' shared':''}"><div class="ce-act"><button class="edit-btn" onclick="openEditModal('${c.id}')">✏️</button>${del}</div><div class="cn">${esc(c.courseName)}</div><div class="ci">${esc(c.instructor)}</div><div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">${timeBadge}${sect}</div></div>`;
         });
         html+=`</td>`;
       });
@@ -556,7 +547,6 @@ async function submitCourse(){
   if(!instr||!cn){showToast('Ad ve ders adı zorunludur.','error');return;}
   if(sBE(te)<sBS(ts)){showToast('Bitiş saati başlangıçtan önce olamaz.','error');return;}
   
-  // YENİ EKLENEN LİMİT KONTROLÜ
   const iN = instr.toLowerCase();
   const cnN = cn.toLowerCase();
   const otherCourses = courses.filter(c => c.program === prog && c.instructor.toLowerCase() === iN && c.id !== editingId && !isShared(c.courseName));
