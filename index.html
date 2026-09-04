@@ -102,6 +102,19 @@ table.st td[rowspan]{background:#fff!important}
 @keyframes sli{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
 .code-hint{background:#1e1e1e;color:#9cdcfe;padding:10px 14px;border-radius:6px;font-family:monospace;font-size:.78rem;word-break:break-all;margin-top:8px;line-height:1.6}
 @media(max-width:760px){.container{padding:10px}.frow{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.setup-box{padding:22px 16px}}
+
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  header, .setup-wrap, .overlay, .toast-c, #filterInstr, .ce-act, .btn { display: none !important; }
+  .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+  .day-block { page-break-inside: avoid; border: 1px solid #ccc; margin-bottom: 20px; box-shadow: none; }
+  .st th { background: #eee !important; color: #000 !important; border: 1px solid #ccc !important; }
+  .st td { border: 1px solid #ccc !important; }
+  .time-cell { background: #fafafa !important; }
+  .ce { border-left: 3px solid #000 !important; background: #fff !important; border: 1px solid #ddd; }
+  .cs { background: #eee !important; color: #000 !important; border: 1px solid #ccc; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
 </style>
 </head>
 <body>
@@ -140,7 +153,14 @@ table.st td[rowspan]{background:#fff!important}
     </div>
     <div class="hright">
       <span id="syncBadge" class="sync-badge sync-busy">⏳ Yükleniyor</span>
-      <button class="btn btn-ghost" id="publicAddBtn" onclick="openAddModal()">
+      
+      <select id="filterInstr" onchange="applyFilter()" style="padding:6px; border-radius:4px; font-size:0.75rem; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.1); color:#fff; outline:none; font-family:'Inter', sans-serif;">
+        <option value="" style="color:#000">Tüm Program</option>
+      </select>
+      
+      <button class="btn btn-outline" style="background:#fff; color:var(--accent); border:none" onclick="window.print()">🖨️ İndir</button>
+      
+      <button class="btn btn-ghost" id="publicAddBtn" onclick="openAddModal()" style="display:none">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ders Ekle
       </button>
     </div>
@@ -320,7 +340,7 @@ table.st td[rowspan]{background:#fff!important}
 
 <script>
 // GAS URL ayarı
-const GAS_URL = 'https://script.google.com/macros/s/AKfycby0EK-NN2tuOJFWa8-ZhLK4qEtE5NUJYwhHx1LMH4lte0Wh2ggzhP3QihGTpJ4kaVAk/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6t05BLB3w8JL3UB3B7s0jYctvzcH4rAwtWjys7ywGF-6Erwj3O3rQvJzm1h2LAJo_/exec';
 
 const ADMIN_PW='turkce2026';
 const PROGS={ytto:'Yurtdışındaki Türk Çocuklarına\nTürkçe Öğretimi',ydto:'Yabancı Dil Olarak\nTürkçe Öğretimi',teyl:'Türkçe Eğitimi\nTezli Yüksek Lisans',doktora:'Türkçe Eğitimi\nDoktora'};
@@ -376,6 +396,7 @@ async function apiPost(body){
   try {
     await fetch(_url, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(body)
     });
@@ -384,7 +405,7 @@ async function apiPost(body){
     console.warn('Veri arka planda alternatif yol ile kaydediliyor.', fetchErr.message);
     const payload = encodeURIComponent(JSON.stringify(body));
     try {
-      await fetch(_url + '?payload=' + payload);
+      await fetch(_url + '?payload=' + payload, {mode: 'no-cors'});
       return { ok: true };
     } catch (e) {
       return { ok: true };
@@ -416,10 +437,12 @@ async function doSetup(){
     let sc = Array.isArray(data.courses) ? data.courses : [];
     const ids = new Set(sc.map(c=>c.id));
     const missing = PRELOADED.filter(p=>!ids.has(p.id));
-    for(const p of missing){
-      apiPost({action:'add_course',data:p});
-      sc.push(p);
+    
+    if(missing.length > 0){
+      sc = [...sc, ...missing];
+      apiPost({action:'set_courses', data: sc});
     }
+    
     courses = sc;
     logs = Array.isArray(data.logs) ? data.logs : [];
     catalog = Array.isArray(data.catalog) ? data.catalog : [];
@@ -429,6 +452,7 @@ async function doSetup(){
     
     showPublic();
     updatePublicUI();
+    populateFilter();
     renderSchedule();
     showToast('Bağlantı başarılı.', 'success');
   }catch(e){
@@ -508,6 +532,25 @@ function updatePublicUI() {
   document.getElementById('headerTerm').textContent = sysSettings.activeTerm + ' Yarıyılı Türkçe Eğitimi Ana Bilim Dalı';
 }
 
+function applyFilter() {
+  renderSchedule();
+}
+
+function populateFilter() {
+  const filter = document.getElementById('filterInstr');
+  const currentVal = filter.value;
+  filter.innerHTML = '<option value="" style="color:#000">Tüm Program</option>';
+  const dispCourses = courses.filter(c => (c.term || 'Güz') === sysSettings.activeTerm);
+  const instrs = [...new Set(dispCourses.map(c => c.instructor))].sort();
+  instrs.forEach(ins => {
+     const opt = document.createElement('option');
+     opt.value = ins; opt.textContent = ins;
+     opt.style.color = '#000';
+     if(ins === currentVal) opt.selected = true;
+     filter.appendChild(opt);
+  });
+}
+
 async function loadFromServer(quiet=false){
   const cached = localStorage.getItem('cached_courses');
   if(cached && !courses.length){
@@ -530,12 +573,16 @@ async function loadFromServer(quiet=false){
     
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
-    if(miss.length){sc=[...sc,...miss];apiPost({action:'set_courses',data:sc}).catch(()=>{});}
+    if(miss.length > 0){
+      sc=[...sc,...miss];
+      apiPost({action:'set_courses',data:sc}).catch(()=>{});
+    }
     courses=sc;
     localStorage.setItem('cached_courses', JSON.stringify(courses));
     setSB('ok','✓ Güncel');
     
     updatePublicUI();
+    populateFilter();
     renderSchedule();
     if(isAdmin) {
       renderCatalog();
@@ -547,6 +594,7 @@ async function loadFromServer(quiet=false){
     if(!courses.length){
       courses=[...PRELOADED];
       updatePublicUI();
+      populateFilter();
       renderSchedule();
     }
   }finally{lb(false);}
@@ -564,12 +612,15 @@ async function _refreshInBackground(){
     
     const ids=new Set(sc.map(c=>c.id));
     const miss=PRELOADED.filter(p=>!ids.has(p.id));
-    if(miss.length){sc=[...sc,...miss];}
+    if(miss.length > 0){
+      sc=[...sc,...miss];
+    }
     courses=sc;
     localStorage.setItem('cached_courses', JSON.stringify(courses));
     setSB('ok','✓ Güncel');
     
     updatePublicUI();
+    populateFilter();
     renderSchedule();
     if(isAdmin) {
       renderCatalog();
@@ -588,11 +639,18 @@ function sBE(t){return SLOTS.findIndex(s=>s.end===t);}
 function span(c){const si=sBS(c.timeStart),ei=sBE(c.timeEnd);if(si<0||ei<0)return 1;return Math.max(1,ei-si+1);}
 
 function renderSchedule(){
-  const dispCourses = courses.filter(c => (c.term || 'Güz') === sysSettings.activeTerm);
+  const fVal = document.getElementById('filterInstr').value;
+  let dispCourses = courses.filter(c => (c.term || 'Güz') === sysSettings.activeTerm);
+  
+  if (fVal) {
+    dispCourses = dispCourses.filter(c => c.instructor === fVal);
+  }
   
   const cont=document.getElementById('dayBlocks');let html='';
   DAYS.forEach(day=>{
     const dc=dispCourses.filter(c=>c.day===day);
+    if(fVal && dc.length === 0) return;
+    
     const lk={};PROG_KEYS.forEach(pk=>{lk[pk]={};SLOTS.forEach((_,i)=>{lk[pk][i]=[];});});
     dc.forEach(c=>{const si=sBS(c.timeStart);if(si>=0)lk[c.program][si].push(c);});
     const consumed={},ck=(p,i)=>`${p}|${i}`;
@@ -724,6 +782,10 @@ function onAdminProgChange() { popAdminCourses(document.getElementById('aProg').
 function onAdminCourseChange() { popAdminInstr(document.getElementById('aProg').value, document.getElementById('aCourse').value, null); }
 
 function openAddModal(){
+  if (sysSettings.isLocked && !isAdmin) {
+      showToast('Ders ekleme yöneticiler tarafından kapatılmıştır.', 'error');
+      return;
+  }
   editingId=null;
   document.getElementById('modalTitle').textContent='Ders Ekle';
   document.getElementById('modalSaveBtn').textContent='Kaydet';
@@ -737,6 +799,10 @@ function openAddModal(){
 }
 
 function openEditModal(id){
+  if (sysSettings.isLocked && !isAdmin) {
+      showToast('Ders düzenleme yöneticiler tarafından kapatılmıştır.', 'error');
+      return;
+  }
   const c=courses.find(x=>x.id===id);if(!c)return;
   editingId=id;
   document.getElementById('modalTitle').textContent='Ders Düzenle';
@@ -775,6 +841,7 @@ async function submitCourse(){
   }
   localStorage.setItem('cached_courses', JSON.stringify(courses));
   closeAddModal();
+  populateFilter();
   renderSchedule();
   if(isAdmin){renderAdminStats();renderAdminManage();}
   showToast(editingId?'Ders güncellendi.':'Ders eklendi.','success');
@@ -800,6 +867,7 @@ async function confirmDelete(){
 
   courses=courses.filter(x=>x.id!==pendingDelId);
   localStorage.setItem('cached_courses', JSON.stringify(courses));
+  populateFilter();
   renderSchedule();
   if(isAdmin){renderAdminStats();renderAdminManage();}
   showToast('Ders silindi.','success');
@@ -839,6 +907,7 @@ function saveSettings() {
   apiPost({ action: 'set_settings', data: sysSettings }).catch(e=>console.warn(e));
   showToast('Ayarlar başarıyla kaydedildi.', 'success');
   updatePublicUI();
+  populateFilter();
   renderSchedule();
 }
 
